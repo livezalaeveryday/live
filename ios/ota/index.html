@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ติดตั้งแอป live สำหรับ iOS (Safari OTA)</title>
+  <style>
+    :root {
+      --bg: #0B0F17;
+      --surface: #161F30;
+      --surface-elevated: #1E293B;
+      --border: #2D3B55;
+      --primary: #FF6B00;
+      --primary-hover: #E65100;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --success: #10B981;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .app-header {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .app-icon {
+      width: 108px;
+      height: 108px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .app-icon svg {
+      width: 60px;
+      height: 60px;
+    }
+    .app-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    .app-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .badge-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .badge {
+      background: rgba(255, 107, 0, 0.12);
+      color: var(--primary);
+      border: 1px solid rgba(255, 107, 0, 0.25);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .install-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .btn-install {
+      display: block;
+      width: 100%;
+      background: linear-gradient(135deg, #FF6B00 0%, #E65100 100%);
+      color: #FFFFFF;
+      text-align: center;
+      text-decoration: none;
+      font-size: 17px;
+      font-weight: 600;
+      padding: 16px;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(255, 107, 0, 0.35);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-install:active {
+      transform: scale(0.98);
+      opacity: 0.92;
+    }
+    .safari-notice {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #A7F3D0;
+      margin-top: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+    .steps-section {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px 24px;
+    }
+    .steps-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .step-item {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .step-item:last-child {
+      margin-bottom: 0;
+    }
+    .step-number {
+      width: 26px;
+      height: 26px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #CBD5E1;
+    }
+    .step-content strong {
+      color: #F8FAFC;
+    }
+    .step-highlight {
+      display: inline-block;
+      background: #0B0F17;
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #F8FAFC;
+      margin-top: 4px;
+    }
+    .footer {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+    .footer a {
+      color: var(--text-muted);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="app-header">
+      <div class="app-icon">
+        <!-- Livezala L Icon with Amber Dot -->
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M30 24V74H70" stroke="#F8FAFC" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="70" cy="32" r="9" fill="#FF6B00"/>
+        </svg>
+      </div>
+      <h1 class="app-title">live</h1>
+      <p class="app-sub">แอปพลิเคชันสมาชิกและโซเชียลตัวละคร AI</p>
+      <div class="badge-bar">
+        <span class="badge">iOS v1.0.0</span>
+        <span class="badge">Safari OTA</span>
+        <span class="badge">com.livezala.app</span>
+      </div>
+    </div>
+
+    <div class="install-card">
+      <a id="installBtn" href="itms-services://?action=download-manifest&url=https://livezala.com/downloads/ios/manifest.plist" class="btn-install">
+        📲 ติดตั้งแอปบน iPhone
+      </a>
+      <div class="safari-notice">
+        <span>💡</span>
+        <span>ต้องเปิดหน้านี้ผ่าน <strong>Safari บน iPhone</strong> เท่านั้น เมื่อกดปุ่ม ระบบ iOS จะแสดงหน้าต่างยืนยันการติดตั้ง</span>
+      </div>
+    </div>
+
+    <div class="steps-section">
+      <h2 class="steps-title">📌 วิธีติดตั้งและเปิดใช้งาน (3 ขั้นตอน)</h2>
+      
+      <div class="step-item">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <strong>กดปุ่ม "ติดตั้งแอปบน iPhone"</strong><br>
+          กดเลือก <strong>"ติดตั้ง" (Install)</strong> ในหน้าต่างป๊อปอัปของ Safari แอปจะเริ่มดาวน์โหลดลงหน้าโฮมของ iPhone ทันที
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <strong>เปิดการตั้งค่าความปลอดภัย (ครั้งแรกเท่านั้น)</strong><br>
+          ไปที่แอป <strong>การตั้งค่า (Settings)</strong> บน iPhone:<br>
+          <div class="step-highlight">การตั้งค่า > ทั่วไป > การจัดการ VPN และอุปกรณ์</div>
+          <div style="margin-top: 2px;">(Settings > General > VPN & Device Management)</div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <strong>กดยืนยัน "เชื่อถือ" (Trust Developer)</strong><br>
+          เลือกโปรไฟล์ขององค์กร/ผู้พัฒนา และกด <strong>"เชื่อถือ" (Trust)</strong> จากนั้นสามารถเข้าใช้งานแอป <strong>live</strong> ได้ทันที
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>© 2026 Livezala. All rights reserved.</p>
+      <p>ระบบสมาชิกและเติมเครดิตดำเนินการผ่าน <a href="https://livezala.com">livezala.com</a></p>
+      <p><a href="https://livezala.com/delete-account">นโยบายความเป็นส่วนตัวและคำขอลบบัญชี</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Detection logic for non-Safari / non-iOS users
+    document.addEventListener("DOMContentLoaded", function() {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      
+      if (!isIOS) {
+        const notice = document.querySelector(".safari-notice");
+        if (notice) {
+          notice.style.background = "rgba(239, 68, 68, 0.1)";
+          notice.style.borderColor = "rgba(239, 68, 68, 0.25)";
+          notice.style.color = "#FCA5A5";
+          notice.innerHTML = "<span>⚠️</span><span>ตรวจพบว่าคุณไม่ได้เปิดบนอุปกรณ์ iPhone/iPad กรุณาสแกนหรือเปิดลิงก์นี้ใน <strong>Safari บน iPhone</strong> เพื่อติดตั้งแอป</span>";
+        }
+      }
+    });
+  </script>
+</body>
+</html>

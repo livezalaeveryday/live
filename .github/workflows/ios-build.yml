@@ -1,0 +1,270 @@
+name: iOS Build & Safari OTA Distribution
+
+on:
+  push:
+    branches: [ main, master, release/** ]
+    paths:
+      - 'src/**'
+      - 'ios/**'
+      - 'App.tsx'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/ios-build.yml'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      export_method:
+        description: 'Export Method (ad-hoc, enterprise, development, unsigned)'
+        required: true
+        default: 'ad-hoc'
+        type: choice
+        options:
+          - ad-hoc
+          - enterprise
+          - development
+          - unsigned
+      ota_base_url:
+        description: 'Base HTTPS URL where the IPA and manifest are hosted for Safari OTA'
+        required: false
+        default: 'https://livezala.com/downloads/ios'
+        type: string
+
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios:
+    name: Build iOS IPA & Generate Safari OTA Manifest
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Set Up Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 3. Install Node.js Dependencies
+        run: |
+          npm ci
+
+      - name: 4. Type Check Codebase
+        run: |
+          npx tsc --noEmit
+
+      - name: 5. Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: 6. Install CocoaPods Dependencies
+        working-directory: ios
+        run: |
+          pod install --repo-update
+
+      - name: 7. Configure Apple Signing Certificate & Provisioning Profile
+        id: setup_signing
+        env:
+          APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD || 'temporal_build_keychain_123' }}
+        run: |
+          if [ -n "$APPLE_CERTIFICATE_BASE64" ] && [ -n "$PROVISIONING_PROFILE_BASE64" ]; then
+            echo "has_signing=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Apple Signing Secrets detected. Installing certificate and provisioning profile..."
+
+            # Create temporary build keychain
+            KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain
+            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+            # Decode and import Certificate
+            CERT_PATH=$RUNNER_TEMP/cert.p12
+            echo "$APPLE_CERTIFICATE_BASE64" | base64 --decode > "$CERT_PATH"
+            security import "$CERT_PATH" -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+            security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
+
+            # Decode and install Provisioning Profile
+            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+            PROFILE_PATH=$RUNNER_TEMP/profile.mobileprovision
+            echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+            cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
+            echo "✅ Provisioning profile installed."
+          else
+            echo "has_signing=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ No Apple Signing Secrets found in repository secrets."
+            echo "ℹ️ Proceeding with unsigned archive & packaging payload for Sideloading / AltStore / Scarlet / Sideloadly."
+          fi
+
+      - name: 8. Build Xcode Archive
+        run: |
+          mkdir -p ios/build
+          if [ "${{ steps.setup_signing.outputs.has_signing }}" = "true" ]; then
+            echo "Building signed archive with xcodebuild..."
+            xcodebuild archive \
+              -workspace ios/LivezalaApp.xcworkspace \
+              -scheme LivezalaApp \
+              -configuration Release \
+              -archivePath ios/build/LivezalaApp.xcarchive \
+              -destination "generic/platform=iOS"
+          else
+            echo "Building unsigned archive with xcodebuild..."
+            xcodebuild archive \
+              -workspace ios/LivezalaApp.xcworkspace \
+              -scheme LivezalaApp \
+              -configuration Release \
+              -archivePath ios/build/LivezalaApp.xcarchive \
+              -destination "generic/platform=iOS" \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO
+          fi
+
+      - name: 9. Export IPA Package
+        run: |
+          mkdir -p ios/build/ipa
+          EXPORT_METHOD="${{ inputs.export_method || 'ad-hoc' }}"
+
+          if [ "${{ steps.setup_signing.outputs.has_signing }}" = "true" ] && [ "$EXPORT_METHOD" != "unsigned" ]; then
+            echo "Exporting signed IPA using method: $EXPORT_METHOD..."
+            
+            # Use dynamic export options matching requested method
+            cat <<EOF > ios/build/ExportOptionsDynamic.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>${EXPORT_METHOD}</string>
+    <key>signingStyle</key>
+    <string>automatic</string>
+    <key>stripSwiftSymbols</key>
+    <true/>
+    <key>compileBitcode</key>
+    <false/>
+</dict>
+</plist>
+EOF
+            xcodebuild -exportArchive \
+              -archivePath ios/build/LivezalaApp.xcarchive \
+              -exportOptionsPlist ios/build/ExportOptionsDynamic.plist \
+              -exportPath ios/build/ipa
+              
+            # Rename to canonical name if needed
+            if [ -f ios/build/ipa/LivezalaApp.ipa ]; then
+              cp ios/build/ipa/LivezalaApp.ipa ios/build/ipa/live-app-release.ipa
+            fi
+          else
+            echo "Packaging unsigned IPA payload..."
+            APP_PATH=$(find ios/build/LivezalaApp.xcarchive/Products/Applications -name "*.app" | head -n 1)
+            if [ -z "$APP_PATH" ]; then
+              echo "❌ Error: Could not find .app bundle in archive!"
+              exit 1
+            fi
+            echo "Found app bundle at: $APP_PATH"
+            PAYLOAD_DIR=ios/build/Payload
+            rm -rf "$PAYLOAD_DIR"
+            mkdir -p "$PAYLOAD_DIR"
+            cp -R "$APP_PATH" "$PAYLOAD_DIR/"
+            
+            cd ios/build
+            zip -q -r ipa/live-app-unsigned.ipa Payload
+            cp ipa/live-app-unsigned.ipa ipa/live-app-release.ipa
+            cd ../..
+            echo "✅ Created unsigned IPA: ios/build/ipa/live-app-unsigned.ipa"
+          fi
+
+      - name: 10. Generate Safari OTA Manifest (manifest.plist)
+        run: |
+          BASE_URL="${{ inputs.ota_base_url || 'https://livezala.com/downloads/ios' }}"
+          echo "Generating Safari OTA Manifest pointing to: $BASE_URL/live-app-release.ipa"
+          
+          mkdir -p ios/build/ota
+          cat <<EOF > ios/build/ota/manifest.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>items</key>
+    <array>
+        <dict>
+            <key>assets</key>
+            <array>
+                <dict>
+                    <key>kind</key>
+                    <string>software-package</string>
+                    <key>url</key>
+                    <string>${BASE_URL}/live-app-release.ipa</string>
+                </dict>
+                <dict>
+                    <key>kind</key>
+                    <string>display-image</string>
+                    <key>needs-shine</key>
+                    <false/>
+                    <key>url</key>
+                    <string>${BASE_URL}/icon-57x57.png</string>
+                </dict>
+                <dict>
+                    <key>kind</key>
+                    <string>full-size-image</string>
+                    <key>needs-shine</key>
+                    <false/>
+                    <key>url</key>
+                    <string>${BASE_URL}/icon-512x512.png</string>
+                </dict>
+            </array>
+            <key>metadata</key>
+            <dict>
+                <key>bundle-identifier</key>
+                <string>com.livezala.app</string>
+                <key>bundle-version</key>
+                <string>1.0.0</string>
+                <key>kind</key>
+                <string>software</string>
+                <key>title</key>
+                <string>live</string>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>
+EOF
+          # Copy OTA web landing page template into build output
+          if [ -f ios/ota/index.html ]; then
+            cp ios/ota/index.html ios/build/ota/
+          fi
+          echo "✅ OTA Manifest created successfully."
+
+      - name: 11. Upload iOS Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-app-ios-build-${{ github.run_number }}
+          path: |
+            ios/build/ipa/*.ipa
+            ios/build/ota/manifest.plist
+            ios/build/ota/index.html
+          retention-days: 30
+
+      - name: 12. Display Safari OTA Installation URL Instructions
+        run: |
+          BASE_URL="${{ inputs.ota_base_url || 'https://livezala.com/downloads/ios' }}"
+          echo "=========================================================================="
+          echo " 🎉 iOS Build & Safari OTA Preparation Complete!"
+          echo "=========================================================================="
+          echo "📱 Safari Direct Install Link (for iPhone Safari):"
+          echo "   itms-services://?action=download-manifest&url=${BASE_URL}/manifest.plist"
+          echo ""
+          echo "🌐 OTA Web Download Page:"
+          echo "   ${BASE_URL}/index.html"
+          echo "=========================================================================="
