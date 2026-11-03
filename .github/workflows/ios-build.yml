@@ -1,4 +1,4 @@
-name: iOS Build & Safari OTA Distribution
+name: "iOS Build & Safari OTA Distribution"
 
 on:
   push:
@@ -36,7 +36,7 @@ concurrency:
 
 jobs:
   build-ios:
-    name: Build iOS IPA & Generate Safari OTA Manifest
+    name: "Build iOS IPA & Generate Safari OTA Manifest"
     runs-on: macos-14
     timeout-minutes: 60
 
@@ -141,30 +141,13 @@ jobs:
 
           if [ "${{ steps.setup_signing.outputs.has_signing }}" = "true" ] && [ "$EXPORT_METHOD" != "unsigned" ]; then
             echo "Exporting signed IPA using method: $EXPORT_METHOD..."
-            
-            # Use dynamic export options matching requested method
-            cat <<EOF > ios/build/ExportOptionsDynamic.plist
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>method</key>
-    <string>${EXPORT_METHOD}</string>
-    <key>signingStyle</key>
-    <string>automatic</string>
-    <key>stripSwiftSymbols</key>
-    <true/>
-    <key>compileBitcode</key>
-    <false/>
-</dict>
-</plist>
-EOF
+            cp ios/ExportOptions.plist ios/build/ExportOptionsDynamic.plist
+            sed -i '' "s|<string>ad-hoc</string>|<string>${EXPORT_METHOD}</string>|g" ios/build/ExportOptionsDynamic.plist 2>/dev/null || sed -i "s|<string>ad-hoc</string>|<string>${EXPORT_METHOD}</string>|g" ios/build/ExportOptionsDynamic.plist
             xcodebuild -exportArchive \
               -archivePath ios/build/LivezalaApp.xcarchive \
               -exportOptionsPlist ios/build/ExportOptionsDynamic.plist \
               -exportPath ios/build/ipa
               
-            # Rename to canonical name if needed
             if [ -f ios/build/ipa/LivezalaApp.ipa ]; then
               cp ios/build/ipa/LivezalaApp.ipa ios/build/ipa/live-app-release.ipa
             fi
@@ -191,61 +174,14 @@ EOF
       - name: 10. Generate Safari OTA Manifest (manifest.plist)
         run: |
           BASE_URL="${{ inputs.ota_base_url || 'https://livezala.com/ios' }}"
-          echo "Generating Safari OTA Manifest pointing to: $BASE_URL/live-app-release.ipa"
-          
+          echo "Preparing Safari OTA distribution files pointing to: $BASE_URL"
           mkdir -p ios/build/ota
-          cat <<EOF > ios/build/ota/manifest.plist
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>items</key>
-    <array>
-        <dict>
-            <key>assets</key>
-            <array>
-                <dict>
-                    <key>kind</key>
-                    <string>software-package</string>
-                    <key>url</key>
-                    <string>${BASE_URL}/live-app-release.ipa</string>
-                </dict>
-                <dict>
-                    <key>kind</key>
-                    <string>display-image</string>
-                    <key>needs-shine</key>
-                    <false/>
-                    <key>url</key>
-                    <string>${BASE_URL}/icon-57x57.png</string>
-                </dict>
-                <dict>
-                    <key>kind</key>
-                    <string>full-size-image</string>
-                    <key>needs-shine</key>
-                    <false/>
-                    <key>url</key>
-                    <string>${BASE_URL}/icon-512x512.png</string>
-                </dict>
-            </array>
-            <key>metadata</key>
-            <dict>
-                <key>bundle-identifier</key>
-                <string>com.livezala.app</string>
-                <key>bundle-version</key>
-                <string>1.0.0</string>
-                <key>kind</key>
-                <string>software</string>
-                <key>title</key>
-                <string>live</string>
-            </dict>
-        </dict>
-    </array>
-</dict>
-</plist>
-EOF
-          # Copy OTA web landing page template into build output
           if [ -d ios/ota ]; then
             cp -R ios/ota/* ios/build/ota/
+          fi
+          if [ -n "$BASE_URL" ] && [ "$BASE_URL" != "https://livezala.com/ios" ]; then
+            sed -i '' "s|https://livezala.com/ios|$BASE_URL|g" ios/build/ota/manifest.plist 2>/dev/null || sed -i "s|https://livezala.com/ios|$BASE_URL|g" ios/build/ota/manifest.plist
+            sed -i '' "s|https://livezala.com/ios|$BASE_URL|g" ios/build/ota/index.html 2>/dev/null || sed -i "s|https://livezala.com/ios|$BASE_URL|g" ios/build/ota/index.html
           fi
           echo "✅ OTA Manifest and web files created successfully."
 
