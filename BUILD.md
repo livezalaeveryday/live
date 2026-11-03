@@ -76,13 +76,16 @@ cd "F:\livezala-app\android"
 - **ตำแหน่งไฟล์ผลลัพธ์ (AAB Output):**  
   `F:\livezala-app\android\app\build\outputs\bundle\release\app-release.aab`
 
-### 6.2 Build ไฟล์ APK สำหรับรันบนเครื่องจริงหรือทดสอบด่วน
+### 6.2 Build ไฟล์ APK สำหรับรันบนเครื่องจริงหรือติดตั้งตรง (Direct Install / livezala.com/mobileapp)
 ```powershell
 cd "F:\livezala-app\android"
 .\gradlew.bat :app:assembleRelease
 ```
 - **ตำแหน่งไฟล์ผลลัพธ์ (APK Output):**  
   `F:\livezala-app\android\app\build\outputs\apk\release\app-release.apk`
+- **ขนาดไฟล์จริง:** `55,511,153 bytes` (~52.94 MB)
+- **SHA-256 Checksum:** `1650eabe81ea27aa78328930e7ed7637e1a9774eb988064014ac73af830f1337`
+- **การนำไปใช้งาน:** ผู้ประสานงาน (พี่ใหญ่) นำไปวางบนศูนย์รวมดาวน์โหลด https://livezala.com/mobileapp เพื่อให้ผู้ใช้ Android ติดตั้งตรงได้ทันทีก่อนขึ้น Google Play Store ตามคำสั่งเจ้าของ
 
 ---
 
