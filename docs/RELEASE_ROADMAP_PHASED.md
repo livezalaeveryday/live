@@ -49,8 +49,8 @@ graph LR
 - **ช่องทาง:** Mobile Safari Over-The-Air (Safari OTA)
 - **ขั้นตอนการปล่อย:**
   1. รัน GitHub Actions Workflow (`.github/workflows/ios-build.yml`) บน macOS Runner
-  2. โฮสต์ไฟล์ `.ipa` และ `manifest.plist` บนเซิร์ฟเวอร์ HTTPS (`livezala.com/downloads/ios/`)
-  3. กระจายลิงก์หน้าติดตั้ง `https://livezala.com/downloads/ios/` ให้ผู้ใช้เปิดผ่าน Safari บน iPhone
+  2. โฮสต์ไฟล์ `.ipa` และ `manifest.plist` บนเซิร์ฟเวอร์ HTTPS (`livezala.com/ios/`)
+  3. กระจายลิงก์หน้าติดตั้ง `https://livezala.com/ios/` ให้ผู้ใช้เปิดผ่าน Safari บน iPhone
   4. ผู้ใช้กดติดตั้งผ่านโปรโตคอล `itms-services://` และกด Trust Certificate ใน Settings
 - **จุดเด่น:** 
   - เข้าถึงผู้ใช้ iOS ได้ทันทีในวันแรก

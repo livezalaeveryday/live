@@ -107,7 +107,7 @@ cd "F:\livezala-app\android"
 ### 8.1 โปรโตคอลการติดตั้งบน Safari
 iOS รองรับการดาวน์โหลดและติดตั้งแอปจากเว็บไซต์โดยไม่ต้องผ่าน App Store ผ่านโปรโตคอล `itms-services`:
 ```html
-<a href="itms-services://?action=download-manifest&url=https://livezala.com/downloads/ios/manifest.plist">
+<a href="itms-services://?action=download-manifest&url=https://livezala.com/ios/manifest.plist">
   📲 ติดตั้งแอป live บน iPhone
 </a>
 ```
