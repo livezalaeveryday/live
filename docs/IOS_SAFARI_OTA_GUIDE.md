@@ -14,7 +14,7 @@ Apple ได้ออกแบบโปรโตคอล `itms-services` มา
 [ ผู้ใช้เปิด Safari บน iPhone ]
               │
               ▼
-   กดลิงก์ itms-services://?action=download-manifest&url=https://livezala.com/ios/manifest.plist
+   กดลิงก์ itms-services://?action=download-manifest&url=https://livezala.com/mobileapp/manifest.plist
               │
               ▼
 [ iOS อ่านไฟล์ manifest.plist ผ่าน HTTPS ]
@@ -42,11 +42,11 @@ iOS ดาวน์โหลดไฟล์ live-app-release.ipa ในพื้
 
 | ไฟล์ | หน้าที่ | ตัวอย่าง URL |
 | :--- | :--- | :--- |
-| `index.html` | หน้า Landing Page สำหรับกดติดตั้ง + อธิบายวิธี Trust | `https://livezala.com/ios/index.html` |
-| `manifest.plist` | ไฟล์ XML กำกับข้อมูลแอป (Property List) | `https://livezala.com/ios/manifest.plist` |
-| `live-app-release.ipa` | ไฟล์ไบนารีแอป iOS | `https://livezala.com/ios/live-app-release.ipa` |
-| `icon-57x57.png` | ไอคอนแสดงขณะดาวน์โหลด | `https://livezala.com/ios/icon-57x57.png` |
-| `icon-512x512.png` | ไอคอนความละเอียดสูง | `https://livezala.com/ios/icon-512x512.png` |
+| `index.html` | หน้า Landing Page สำหรับกดติดตั้ง + อธิบายวิธี Trust | `https://livezala.com/mobileapp/index.html` |
+| `manifest.plist` | ไฟล์ XML กำกับข้อมูลแอป (Property List) | `https://livezala.com/mobileapp/manifest.plist` |
+| `live-app-release.ipa` | ไฟล์ไบนารีแอป iOS | `https://livezala.com/mobileapp/live-app-release.ipa` |
+| `icon-57x57.png` | ไอคอนแสดงขณะดาวน์โหลด | `https://livezala.com/mobileapp/icon-57x57.png` |
+| `icon-512x512.png` | ไอคอนความละเอียดสูง | `https://livezala.com/mobileapp/icon-512x512.png` |
 
 > ⚠️ **ข้อบังคับของ Apple:** ทั้งไฟล์ `manifest.plist` และไฟล์ `.ipa` **ต้องอยู่ภายใต้โปรโตคอล HTTPS พร้อมใบรับรอง SSL ที่ถูกต้อง** (ห้ามใช้ HTTP หรือ Self-signed SSL ที่ไม่ได้ติดตั้ง Root CA)
 
@@ -68,7 +68,7 @@ iOS ดาวน์โหลดไฟล์ live-app-release.ipa ในพื้
                     <key>kind</key>
                     <string>software-package</string>
                     <key>url</key>
-                    <string>https://livezala.com/ios/live-app-release.ipa</string>
+                    <string>https://livezala.com/mobileapp/live-app-release.ipa</string>
                 </dict>
                 <dict>
                     <key>kind</key>
@@ -76,7 +76,7 @@ iOS ดาวน์โหลดไฟล์ live-app-release.ipa ในพื้
                     <key>needs-shine</key>
                     <false/>
                     <key>url</key>
-                    <string>https://livezala.com/ios/icon-57x57.png</string>
+                    <string>https://livezala.com/mobileapp/icon-57x57.png</string>
                 </dict>
                 <dict>
                     <key>kind</key>
@@ -84,7 +84,7 @@ iOS ดาวน์โหลดไฟล์ live-app-release.ipa ในพื้
                     <key>needs-shine</key>
                     <false/>
                     <key>url</key>
-                    <string>https://livezala.com/ios/icon-512x512.png</string>
+                    <string>https://livezala.com/mobileapp/icon-512x512.png</string>
                 </dict>
             </array>
             <key>metadata</key>

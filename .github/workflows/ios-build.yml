@@ -27,7 +27,7 @@ on:
       ota_base_url:
         description: 'Base HTTPS URL where the IPA and manifest are hosted for Safari OTA'
         required: false
-        default: 'https://livezala.com/ios'
+        default: 'https://livezala.com/mobileapp'
         type: string
 
 concurrency:
@@ -184,15 +184,15 @@ jobs:
 
       - name: 10. Generate Safari OTA Manifest (manifest.plist)
         run: |
-          BASE_URL="${{ inputs.ota_base_url || 'https://livezala.com/ios' }}"
+          BASE_URL="${{ inputs.ota_base_url || 'https://livezala.com/mobileapp' }}"
           echo "Preparing Safari OTA distribution files pointing to: $BASE_URL"
           mkdir -p ios/build/ota
           if [ -d ios/ota ]; then
             cp -R ios/ota/* ios/build/ota/
           fi
-          if [ -n "$BASE_URL" ] && [ "$BASE_URL" != "https://livezala.com/ios" ]; then
-            sed -i '' "s|https://livezala.com/ios|$BASE_URL|g" ios/build/ota/manifest.plist 2>/dev/null || sed -i "s|https://livezala.com/ios|$BASE_URL|g" ios/build/ota/manifest.plist
-            sed -i '' "s|https://livezala.com/ios|$BASE_URL|g" ios/build/ota/index.html 2>/dev/null || sed -i "s|https://livezala.com/ios|$BASE_URL|g" ios/build/ota/index.html
+          if [ -n "$BASE_URL" ] && [ "$BASE_URL" != "https://livezala.com/mobileapp" ]; then
+            sed -i '' "s|https://livezala.com/mobileapp|$BASE_URL|g" ios/build/ota/manifest.plist 2>/dev/null || sed -i "s|https://livezala.com/mobileapp|$BASE_URL|g" ios/build/ota/manifest.plist
+            sed -i '' "s|https://livezala.com/mobileapp|$BASE_URL|g" ios/build/ota/index.html 2>/dev/null || sed -i "s|https://livezala.com/mobileapp|$BASE_URL|g" ios/build/ota/index.html
           fi
           echo "✅ OTA Manifest and web files created successfully."
 
@@ -207,7 +207,7 @@ jobs:
 
       - name: 12. Display Safari OTA Installation URL Instructions
         run: |
-          BASE_URL="${{ inputs.ota_base_url || 'https://livezala.com/ios' }}"
+          BASE_URL="${{ inputs.ota_base_url || 'https://livezala.com/mobileapp' }}"
           echo "=========================================================================="
           echo " 🎉 iOS Build & Safari OTA Preparation Complete!"
           echo "=========================================================================="
