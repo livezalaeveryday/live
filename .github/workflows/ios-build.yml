@@ -44,6 +44,17 @@ jobs:
       - name: 1. Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Select Xcode 16
+        run: |
+          if [ -d "/Applications/Xcode_16.2.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.2.app
+          elif [ -d "/Applications/Xcode_16.1.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.1.app
+          elif [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app
+          fi
+          xcodebuild -version
+
       - name: 2. Set Up Node.js 22.x
         uses: actions/setup-node@v4
         with:
