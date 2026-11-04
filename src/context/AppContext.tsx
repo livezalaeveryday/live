@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Post, Character, WordFilter, BlockedEntity, DMConversation, DirectMessage, BuildFlavor } from '../types';
-import { initialCharacters, initialPosts, initialWordFilters, initialBlockedEntities, initialConversations } from '../api/mockData';
+import { initialCharacters, initialPosts, initialWordFilters, initialBlockedEntities, initialConversations, initialCurrentUser } from '../api/mockData';
 import { FlavorConfig, FLAVOR_CONFIGS, DEFAULT_FLAVOR } from '../config/flavor';
 
 interface AppContextType {
@@ -84,10 +84,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true };
   };
 
-  // Create post in the name of activeCharacter
+  // Create post: Owner posts in their own name, showcasing the selected character!
   const createPost = (content: string, imageUrl?: string) => {
     const newPost: Post = {
       id: 'post_' + Date.now(),
+      ownerId: initialCurrentUser.id,
+      ownerName: initialCurrentUser.name,
+      ownerAvatarUrl: initialCurrentUser.avatarUrl || 'https://livezala.com/media/avatar/default',
+      ownerHandle: initialCurrentUser.handle || '@foolish_max',
+      isOfficialOwner: false,
       characterId: activeCharacter.id,
       character: activeCharacter,
       content,

@@ -4,18 +4,21 @@ import { colors } from '../theme/colors';
 
 interface BadgeProps {
   label: string;
-  variant?: 'primary' | 'official' | 'muted' | 'danger';
+  variant?: 'primary' | 'official' | 'gold' | 'muted' | 'danger' | 'success';
 }
 
 export const Badge: React.FC<BadgeProps> = ({ label, variant = 'muted' }) => {
   const getStyles = () => {
     switch (variant) {
-      case 'primary':
-        return { bg: colors.primaryMuted, text: colors.primary, border: colors.primary };
       case 'official':
-        return { bg: 'rgba(56, 189, 248, 0.15)', text: colors.info, border: colors.info };
+      case 'gold':
+      case 'primary':
+        // สีทองเว็บหลัก: พื้นทองเข้ม #221A08 ขอบทองเข้ม #4A3512 ตัวอักษรทอง #E9A13B
+        return { bg: colors.badgeBg, text: colors.badgeText, border: colors.badgeBorder };
       case 'danger':
         return { bg: colors.dangerMuted, text: colors.danger, border: colors.danger };
+      case 'success':
+        return { bg: colors.successMuted, text: colors.success, border: colors.success };
       default:
         return { bg: colors.surfaceElevated, text: colors.textSecondary, border: colors.border };
     }

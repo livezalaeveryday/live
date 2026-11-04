@@ -4,6 +4,7 @@ import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { PostCard } from '../components/PostCard';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 
 interface FeedScreenProps {
   onOpenCreatePost: () => void;
@@ -12,23 +13,32 @@ interface FeedScreenProps {
 
 export const FeedScreen: React.FC<FeedScreenProps> = ({ onOpenCreatePost, onSelectCharacter }) => {
   const { getFilteredPosts, activeCharacter } = useApp();
+  const { user } = useAuth();
   const posts = getFilteredPosts();
 
   return (
     <View style={styles.container}>
       <Header
-        title="ฟีดแอป"
-        subtitle="โซเชียลตัวละคร AI (แยกจากเว็บ)"
-        rightActionText="+ โพสต์"
+        title="ฟีดสมาชิก live"
+        subtitle="เจ้าของโพสต์อวดตัวละคร AI ในสังกัด"
+        rightActionText="+ โพสต์อวด"
         onRightAction={onOpenCreatePost}
       />
 
-      {/* Active Identity Bar */}
+      {/* Active Identity Bar — Model: เจ้าของโพสต์ในนามตัวเอง เลือกตัวละครมาอวด */}
       <View style={styles.identityBar}>
-        <Image source={{ uri: activeCharacter.avatarUrl }} style={styles.smallAvatar} />
-        <Text style={styles.identityText}>
-          คุณกำลังใช้งานในนาม: <Text style={styles.identityBold}>{activeCharacter.name}</Text>
-        </Text>
+        <Image
+          source={{ uri: user?.avatarUrl || 'https://livezala.com/media/avatar/default' }}
+          style={styles.smallAvatar}
+        />
+        <View style={styles.identityCol}>
+          <Text style={styles.identityText}>
+            โพสต์ในนาม: <Text style={styles.identityBold}>{user?.name || 'สมาชิก Livezala'}</Text>
+          </Text>
+          <Text style={styles.showcaseNote}>
+            🎭 ตัวละครที่เลือกอวด: <Text style={styles.showcaseBold}>{activeCharacter.name}</Text>
+          </Text>
+        </View>
       </View>
 
       <FlatList
@@ -43,10 +53,10 @@ export const FeedScreen: React.FC<FeedScreenProps> = ({ onOpenCreatePost, onSele
             <Text style={styles.emptyIcon}>📭</Text>
             <Text style={styles.emptyTitle}>ยังไม่มีโพสต์ในฟีด</Text>
             <Text style={styles.emptyText}>
-              โพสต์แรกเพื่อเปิดบทสนทนาของตัวละคร AI ของคุณ หรือตรวจดูว่ามีการบล็อกเนื้อหาอยู่หรือไม่
+              ร่วมเป็นคนแรกที่เลือกตัวละคร AI ของคุณมาโพสต์อวดบนฟีดสมาชิก
             </Text>
-            <TouchableOpacity style={styles.createBtn} onPress={onOpenCreatePost}>
-              <Text style={styles.createBtnText}>สร้างโพสต์ใหม่</Text>
+            <TouchableOpacity style={styles.createBtn} onPress={onOpenCreatePost} activeOpacity={0.8}>
+              <Text style={styles.createBtnText}>สร้างโพสต์อวดตัวละคร</Text>
             </TouchableOpacity>
           </View>
         }
@@ -63,27 +73,39 @@ const styles = StyleSheet.create({
   identityBar: {
     backgroundColor: colors.surface,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
   },
   smallAvatar: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 1,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1.5,
     borderColor: colors.primary,
   },
+  identityCol: {
+    flex: 1,
+  },
   identityText: {
-    color: colors.textSecondary,
+    color: colors.text,
     fontSize: 12,
   },
   identityBold: {
     color: colors.primary,
     fontWeight: '700',
+  },
+  showcaseNote: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  showcaseBold: {
+    color: colors.text,
+    fontWeight: '600',
   },
   listContent: {
     paddingBottom: 24,
@@ -121,7 +143,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   createBtnText: {
-    color: colors.white,
+    color: colors.black,
     fontWeight: '700',
     fontSize: 14,
   },

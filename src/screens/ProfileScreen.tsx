@@ -17,7 +17,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onOpenBlockedList,
 }) => {
   const { user, signOut, updateCredits } = useAuth();
-  const { wordFilters, blockedEntities, flavor, flavorConfig, setFlavor } = useApp();
+  const { wordFilters, blockedEntities, flavor, flavorConfig, setFlavor, myCharacters } = useApp();
   const [showPromptPayModal, setShowPromptPayModal] = useState<boolean>(false);
 
   const handleOpenWebAccount = () => {
@@ -65,8 +65,29 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.name || 'สมาชิก Livezala'}</Text>
             <Text style={styles.userEmail}>{user?.email || 'บัญชี Google'}</Text>
-            <Text style={styles.statusBadge}>🟢 เชื่อมต่อระบบสมาชิก Livezala แล้ว</Text>
+            <Text style={styles.userFollowStats}>
+              👥 {user?.followerCount ?? 340} ผู้ติดตาม · กำลังติดตาม {user?.followingCount ?? 125}
+            </Text>
+            <Text style={styles.statusBadge}>🟢 สมาชิกทางการระบบ Livezala</Text>
           </View>
+        </View>
+
+        {/* My Characters Showcase Group — Model: ตัวละครแสดงเป็นผลงานของเจ้าของใต้บัญชีเจ้าของ */}
+        <Text style={styles.groupHeader}>🎭 ตัวละครผลงานในสังกัดของคุณ ({myCharacters.length})</Text>
+        <View style={styles.myCharactersList}>
+          {myCharacters.map((char) => (
+            <View key={char.id} style={styles.myCharItem}>
+              <Image source={{ uri: char.avatarUrl }} style={styles.myCharAvatar} />
+              <View style={styles.myCharInfo}>
+                <Text style={styles.myCharName}>{char.name}</Text>
+                <Text style={styles.myCharHandle}>{char.handle}</Text>
+                <Text style={styles.myCharBio} numberOfLines={1}>{char.bio}</Text>
+              </View>
+              <View style={styles.myCharBadge}>
+                <Text style={styles.myCharBadgeText}>ผลงานของคุณ</Text>
+              </View>
+            </View>
+          ))}
         </View>
 
         {/* User Credits & Membership Card (Dynamic by Build Flavor: direct vs play) */}
@@ -264,6 +285,63 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
+  userFollowStats: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  myCharactersList: {
+    marginBottom: 18,
+    gap: 8,
+  },
+  myCharItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+    padding: 10,
+    gap: 12,
+  },
+  myCharAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  myCharInfo: {
+    flex: 1,
+  },
+  myCharName: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  myCharHandle: {
+    color: colors.textSecondary,
+    fontSize: 11,
+  },
+  myCharBio: {
+    color: colors.textSecondary,
+    fontSize: 10,
+    marginTop: 2,
+  },
+  myCharBadge: {
+    backgroundColor: colors.badgeBg,
+    borderWidth: 1,
+    borderColor: colors.badgeBorder,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  myCharBadgeText: {
+    color: colors.badgeText,
+    fontSize: 10,
+    fontWeight: '700',
+  },
   directPurchaseBox: {
     marginTop: 10,
     borderTopWidth: 1,
@@ -271,26 +349,26 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   directNote: {
-    color: '#93C5FD',
+    color: colors.primary,
     fontSize: 11,
     lineHeight: 16,
     marginBottom: 10,
   },
   topUpButton: {
-    backgroundColor: '#003D79', // PromptPay Accent Deep Blue
+    backgroundColor: colors.primary, // Brand Gold #E9A13B
     borderWidth: 1,
-    borderColor: '#2563EB',
+    borderColor: colors.badgeBorder,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
-    shadowColor: '#2563EB',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
   },
   topUpButtonText: {
-    color: '#FFFFFF',
+    color: colors.black,
     fontSize: 13,
     fontWeight: 'bold',
     letterSpacing: 0.3,
@@ -301,7 +379,7 @@ const styles = StyleSheet.create({
   flavorCard: {
     backgroundColor: colors.surfaceCard,
     borderWidth: 1,
-    borderColor: '#3B82F6',
+    borderColor: colors.badgeBorder,
     borderRadius: 12,
     padding: 14,
     marginBottom: 20,
@@ -313,20 +391,20 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   flavorBadgeTitle: {
-    color: '#60A5FA',
+    color: colors.primary,
     fontSize: 13,
     fontWeight: 'bold',
   },
   flavorToggleBadge: {
-    backgroundColor: '#1E293B',
+    backgroundColor: colors.badgeBg,
     borderWidth: 1,
-    borderColor: '#60A5FA',
+    borderColor: colors.badgeBorder,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
   flavorToggleBadgeText: {
-    color: '#93C5FD',
+    color: colors.primary,
     fontSize: 11,
     fontWeight: '600',
   },
@@ -337,11 +415,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   flavorChannelText: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontSize: 10,
   },
   creditNote: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontSize: 12,
     lineHeight: 18,
     borderTopWidth: 1,

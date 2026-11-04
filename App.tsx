@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   View,
   Text,
   TouchableOpacity,
+  AppState,
 } from 'react-native';
 import { colors } from './src/theme/colors';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
@@ -35,36 +35,75 @@ const MainNavigator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('feed');
   const [modal, setModal] = useState<ActiveModal>(null);
 
+  // คำสั่งเจ้าของ: Immersive Fullscreen ซ่อนแถบสถานะด้านบนของเครื่อง และซ่อนซ้ำเมื่อ Focus กลับมา
+  useEffect(() => {
+    StatusBar.setHidden(true, 'none');
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        StatusBar.setHidden(true, 'none');
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
   if (!user) {
-    return <LoginScreen />;
+    return (
+      <View style={styles.safeArea}>
+        <StatusBar hidden={true} />
+        <LoginScreen />
+      </View>
+    );
   }
 
   // Handle Sub-screens / Modals
   if (modal?.type === 'create_post') {
-    return <CreatePostScreen onClose={() => setModal(null)} />;
+    return (
+      <View style={styles.safeArea}>
+        <StatusBar hidden={true} />
+        <CreatePostScreen onClose={() => setModal(null)} />
+      </View>
+    );
   }
   if (modal?.type === 'character_detail') {
     return (
-      <CharacterDetailScreen
-        characterId={modal.charId}
-        onBack={() => setModal(null)}
-        onOpenDM={(charId) => setModal({ type: 'chat_room', charId })}
-      />
+      <View style={styles.safeArea}>
+        <StatusBar hidden={true} />
+        <CharacterDetailScreen
+          characterId={modal.charId}
+          onBack={() => setModal(null)}
+          onOpenDM={(charId) => setModal({ type: 'chat_room', charId })}
+        />
+      </View>
     );
   }
   if (modal?.type === 'chat_room') {
-    return <ChatRoomScreen characterId={modal.charId} onBack={() => setModal(null)} />;
+    return (
+      <View style={styles.safeArea}>
+        <StatusBar hidden={true} />
+        <ChatRoomScreen characterId={modal.charId} onBack={() => setModal(null)} />
+      </View>
+    );
   }
   if (modal?.type === 'word_filters') {
-    return <WordFilterScreen onBack={() => setModal(null)} />;
+    return (
+      <View style={styles.safeArea}>
+        <StatusBar hidden={true} />
+        <WordFilterScreen onBack={() => setModal(null)} />
+      </View>
+    );
   }
   if (modal?.type === 'blocked_list') {
-    return <BlockedListScreen onBack={() => setModal(null)} />;
+    return (
+      <View style={styles.safeArea}>
+        <StatusBar hidden={true} />
+        <BlockedListScreen onBack={() => setModal(null)} />
+      </View>
+    );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" />
+    <View style={styles.safeArea}>
+      <StatusBar hidden={true} />
       <View style={styles.screenContainer}>
         {activeTab === 'feed' && (
           <FeedScreen
@@ -127,7 +166,7 @@ const MainNavigator: React.FC = () => {
           <Text style={[styles.tabLabel, activeTab === 'profile' && styles.tabLabelActive]}>โปรไฟล์</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

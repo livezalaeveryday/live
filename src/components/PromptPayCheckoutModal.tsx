@@ -617,15 +617,15 @@ const styles = StyleSheet.create({
   },
   packagePillSelected: {
     borderColor: colors.primary,
-    backgroundColor: '#1E293B',
+    backgroundColor: colors.badgeBg,
   },
   packagePillCredits: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#FBBF24',
+    color: colors.primary,
   },
   packagePillCreditsSelected: {
-    color: '#FBBF24',
+    color: colors.primary,
   },
   packagePillName: {
     fontSize: 11,
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -6,
     right: 4,
-    backgroundColor: '#2563EB',
+    backgroundColor: colors.primary,
     paddingHorizontal: 5,
     paddingVertical: 1,
     borderRadius: 4,
@@ -714,7 +714,7 @@ const styles = StyleSheet.create({
   },
   bankCardSelected: {
     borderColor: colors.primary,
-    backgroundColor: '#1E293B',
+    backgroundColor: colors.badgeBg,
   },
   bankLogoBadge: {
     width: 32,
@@ -785,18 +785,20 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardPill: {
-    backgroundColor: '#334155',
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
   },
   cardPillText: {
-    color: '#FFFFFF',
+    color: colors.text,
     fontSize: 11,
     fontWeight: 'bold',
   },
   summaryBox: {
-    backgroundColor: '#0F172A',
+    backgroundColor: colors.surfaceCard,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 12,
@@ -964,7 +966,7 @@ const styles = StyleSheet.create({
   qrPixel: {
     width: 10,
     height: 10,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#0A0A0A',
   },
   orderDetailsBox: {
     backgroundColor: '#F8FAFC',
@@ -1022,9 +1024,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   saveQrBtn: {
-    backgroundColor: '#1E293B',
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderLight,
     paddingVertical: 11,
     borderRadius: 10,
     alignItems: 'center',
