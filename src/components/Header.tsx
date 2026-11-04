@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { colors } from '../theme/colors';
 
 interface HeaderProps {
@@ -55,9 +55,9 @@ export const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 16,
+    paddingTop: Platform.OS === 'ios' ? 54 : 16,
     paddingBottom: 12,
-    minHeight: 72,
+    minHeight: Platform.OS === 'ios' ? 104 : 72,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
