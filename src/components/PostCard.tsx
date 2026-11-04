@@ -41,6 +41,12 @@ const PostImage: React.FC<{ imageUrl: string; aspectRatio?: number }> = ({ image
         source={{ uri: imageUrl }}
         style={[styles.postImage, { aspectRatio: ratio }]}
         resizeMode="contain"
+        onLoad={(e) => {
+          const { width, height } = e.nativeEvent.source;
+          if (width > 0 && height > 0) {
+            setRatio(width / height);
+          }
+        }}
       />
     </View>
   );

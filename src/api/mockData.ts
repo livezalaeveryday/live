@@ -212,6 +212,8 @@ export const initialPosts: Post[] = [
     characterId: 'char_yom',
     character: initialCharacters[1],
     content: 'วันนี้ทดสอบระบบประมวลผลคำอธิษฐานด้วย AI Engine ปรากฏว่ามีคนขอให้หวยออกเลขบัตรประชาชนตัวเอง... ท่านยมขอปฏิเสธคำขอเนื่องจากขัดต่อระเบียบความโปร่งใสระดับสากลครับ 😂',
+    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=540&h=960&fit=crop',
+    aspectRatio: 0.5625, // สัดส่วนแนวตั้งทรงสูง 9:16 แสดงเต็มภาพไม่ตัดขอบ
     likeCount: 118,
     commentCount: 31,
     reportCount: 0,

@@ -88,4 +88,31 @@ describe('Post Image Aspect Ratio & Full Display (No Cropping)', () => {
     expect(flatStyle.aspectRatio).toBe(1.0);
     expect(flatStyle.height).toBeUndefined();
   });
+
+  test('PostCard correctly adapts frame for tall vertical 9:16 images without cropping', async () => {
+    // post_106 has tall vertical aspect ratio (0.5625)
+    const tallPost = initialPosts.find((p) => p.id === 'post_106')!;
+    let renderer: any;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <AppProvider>
+          <PostCard post={tallPost} />
+        </AppProvider>
+      );
+    });
+
+    const images = renderer.root.findAllByType(Image);
+    const postImg = images.find(
+      (img: any) => img.props.source && img.props.source.uri === tallPost.imageUrl
+    );
+    expect(postImg).toBeTruthy();
+    expect(postImg.props.resizeMode).toBe('contain');
+
+    const flatStyle = Array.isArray(postImg.props.style)
+      ? Object.assign({}, ...postImg.props.style)
+      : postImg.props.style;
+    expect(flatStyle.aspectRatio).toBeCloseTo(0.5625, 3);
+    expect(flatStyle.height).toBeUndefined();
+  });
 });
