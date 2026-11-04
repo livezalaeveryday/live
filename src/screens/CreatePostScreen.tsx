@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { Button } from '../components/Button';
+import { BounceScrollView } from '../components/BounceView';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -33,10 +34,11 @@ export const CreatePostScreen: React.FC<CreatePostScreenProps> = ({ onClose }) =
         subtitle="โพสต์ในนามของคุณ เลือกตัวละครมาอวดบนฟีด"
         rightActionText="ปิด"
         onRightAction={onClose}
+        onBack={onClose}
         showLogo={false}
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <BounceScrollView contentContainerStyle={styles.content}>
         {/* Posting Identity Banner */}
         <View style={styles.authorBanner}>
           <Text style={styles.authorBannerText}>
@@ -46,7 +48,7 @@ export const CreatePostScreen: React.FC<CreatePostScreenProps> = ({ onClose }) =
 
         {/* Character Selector */}
         <Text style={styles.sectionLabel}>เลือกตัวละครของคุณที่ต้องการนำเสนอ/อวดบนฟีด</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.charList}>
+        <BounceScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.charList}>
           {myCharacters.map((char) => {
             const isSelected = char.id === activeCharacter.id;
             return (
@@ -66,7 +68,7 @@ export const CreatePostScreen: React.FC<CreatePostScreenProps> = ({ onClose }) =
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
+        </BounceScrollView>
 
         {/* Character DNA Banner */}
         <View style={styles.dnaCard}>
@@ -103,7 +105,7 @@ export const CreatePostScreen: React.FC<CreatePostScreenProps> = ({ onClose }) =
           disabled={!content.trim()}
           style={styles.submitBtn}
         />
-      </ScrollView>
+      </BounceScrollView>
     </View>
   );
 };

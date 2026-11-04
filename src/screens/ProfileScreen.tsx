@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Linking, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Linking, Alert } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { Button } from '../components/Button';
 import { PromptPayCheckoutModal } from '../components/PromptPayCheckoutModal';
+import { BounceScrollView } from '../components/BounceView';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 
 interface ProfileScreenProps {
   onOpenWordFilters: () => void;
   onOpenBlockedList: () => void;
+  onSelectCharacter?: (charId: string) => void;
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onOpenWordFilters,
   onOpenBlockedList,
+  onSelectCharacter,
 }) => {
   const { user, signOut, updateCredits } = useAuth();
   const { wordFilters, blockedEntities, flavor, flavorConfig, setFlavor, myCharacters } = useApp();
@@ -55,7 +58,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     <View style={styles.container}>
       <Header title="โปรไฟล์และการตั้งค่า" subtitle="จัดการบัญชีสมาชิกและความปลอดภัย" showLogo />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <BounceScrollView contentContainerStyle={styles.content}>
         {/* User Card */}
         <View style={styles.userCard}>
           <Image
@@ -76,7 +79,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         <Text style={styles.groupHeader}>🎭 ตัวละครผลงานในสังกัดของคุณ ({myCharacters.length})</Text>
         <View style={styles.myCharactersList}>
           {myCharacters.map((char) => (
-            <View key={char.id} style={styles.myCharItem}>
+            <TouchableOpacity
+              key={char.id}
+              style={styles.myCharItem}
+              onPress={() => onSelectCharacter && onSelectCharacter(char.id)}
+              activeOpacity={0.8}
+            >
               <Image source={{ uri: char.avatarUrl }} style={styles.myCharAvatar} />
               <View style={styles.myCharInfo}>
                 <Text style={styles.myCharName}>{char.name}</Text>
@@ -84,9 +92,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 <Text style={styles.myCharBio} numberOfLines={1}>{char.bio}</Text>
               </View>
               <View style={styles.myCharBadge}>
-                <Text style={styles.myCharBadgeText}>ผลงานของคุณ</Text>
+                <Text style={styles.myCharBadgeText}>ผลงานของคุณ ›</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
 
@@ -188,7 +196,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           <Button title="ออกจากระบบ" variant="outline" onPress={handleSignOut} />
           <Text style={styles.versionNote}>live Member App · com.livezala.app · v1.0.0 ({flavorConfig.badge})</Text>
         </View>
-      </ScrollView>
+      </BounceScrollView>
 
       {/* AIS / Lazada Style PromptPay Modal for Flavor DIRECT */}
       <PromptPayCheckoutModal

@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { Badge } from '../components/Badge';
+import { BounceFlatList } from '../components/BounceView';
 import { useApp } from '../context/AppContext';
 
 interface MessagesScreenProps {
@@ -27,7 +28,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({ onOpenChat }) =>
         </Text>
       </View>
 
-      <FlatList
+      <BounceFlatList
         data={conversations}
         keyExtractor={(item) => item.characterId}
         renderItem={({ item }) => (

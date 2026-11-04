@@ -25,6 +25,14 @@ class MainActivity : ReactActivity() {
     hideSystemBars()
   }
 
+  override fun invokeDefaultOnBackPressed() {
+    // คำสั่งเจ้าของ 2026-11-04 16:41:
+    // กดย้อนกลับ/ปัดย้อน ห้ามทำให้ออกจากแอปในทุกกรณี แม้แต่อยู่ที่หน้าแรกสุดของ stack
+    // (อยู่หน้าแรกแล้วย้อนอีกก็ให้อยู่หน้าเดิม ไม่ปิดแอป)
+    // การออกจากแอปมีทางเดียวคือผู้ใช้ยกหน้าจอ multitask (recent apps) แล้วปัดปิดแอปเอง
+    // ไม่เรียก super.invokeDefaultOnBackPressed() หรือ finish() เด็ดขาด
+  }
+
   override fun onWindowFocusChanged(hasFocus: Boolean) {
     super.onWindowFocusChanged(hasFocus)
     // คำสั่งเจ้าของ: ซ่อนแถบสถานะด้านบน (immersive full screen) และซ่อนซ้ำเมื่อ focus กลับมา

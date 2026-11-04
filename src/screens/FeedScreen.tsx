@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, FlatList, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { PostCard } from '../components/PostCard';
+import { BounceFlatList } from '../components/BounceView';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -41,7 +42,7 @@ export const FeedScreen: React.FC<FeedScreenProps> = ({ onOpenCreatePost, onSele
         </View>
       </View>
 
-      <FlatList
+      <BounceFlatList
         data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (

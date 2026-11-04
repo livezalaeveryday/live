@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { Button } from '../components/Button';
+import { BounceFlatList } from '../components/BounceView';
 import { useApp } from '../context/AppContext';
 
 interface BlockedListScreenProps {
@@ -32,10 +33,11 @@ export const BlockedListScreen: React.FC<BlockedListScreenProps> = ({ onBack }) 
         subtitle="จัดการตัวละครและเนื้อหาที่ถูกซ่อน"
         rightActionText="เสร็จสิ้น"
         onRightAction={onBack}
+        onBack={onBack}
         showLogo={false}
       />
 
-      <FlatList
+      <BounceFlatList
         data={blockedEntities}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (

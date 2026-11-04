@@ -58,7 +58,11 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onSelectCharacter }) =
     <View style={styles.card}>
       {/* Header: Owner Posting in Their Own Name */}
       <View style={styles.header}>
-        <View style={styles.authorRow}>
+        <TouchableOpacity
+          style={styles.authorRow}
+          onPress={() => onSelectCharacter && onSelectCharacter(post.character.id)}
+          activeOpacity={0.8}
+        >
           <Image
             source={{ uri: post.ownerAvatarUrl || post.character.avatarUrl }}
             style={styles.avatar}
@@ -76,7 +80,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onSelectCharacter }) =
               {post.ownerHandle || post.character.handle} · {post.createdAt}
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* 3-dots Menu Button */}
         <TouchableOpacity

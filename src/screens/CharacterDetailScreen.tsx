@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import { PostCard } from '../components/PostCard';
+import { BounceScrollView } from '../components/BounceView';
 import { useApp } from '../context/AppContext';
 
 interface CharacterDetailScreenProps {
@@ -24,7 +25,7 @@ export const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({
   if (!character) {
     return (
       <View style={styles.container}>
-        <Header title="ไม่พบตัวละคร" rightActionText="กลับ" onRightAction={onBack} showLogo={false} />
+        <Header title="ไม่พบตัวละคร" rightActionText="กลับ" onRightAction={onBack} onBack={onBack} showLogo={false} />
       </View>
     );
   }
@@ -68,10 +69,11 @@ export const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({
         subtitle={`ผลงานสร้างสรรค์โดย ${character.ownerName}`}
         rightActionText="ย้อนกลับ"
         onRightAction={onBack}
+        onBack={onBack}
         showLogo={false}
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <BounceScrollView contentContainerStyle={styles.content}>
         {/* Cover / Profile Banner */}
         <View style={styles.bannerContainer}>
           <View style={styles.bannerBackground} />
@@ -202,7 +204,7 @@ export const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({
             characterPosts.map((post) => <PostCard key={post.id} post={post} />)
           )}
         </View>
-      </ScrollView>
+      </BounceScrollView>
     </View>
   );
 };

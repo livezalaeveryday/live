@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { CharacterCard } from '../components/CharacterCard';
+import { BounceScrollView } from '../components/BounceView';
 import { useApp } from '../context/AppContext';
 
 interface CharactersScreenProps {
@@ -55,7 +56,7 @@ export const CharactersScreen: React.FC<CharactersScreenProps> = ({
         />
       </View>
 
-      <ScrollView contentContainerStyle={styles.list}>
+      <BounceScrollView contentContainerStyle={styles.list}>
         {/* Official Section */}
         {officialChars.length > 0 && (
           <View style={styles.section}>
@@ -100,7 +101,7 @@ export const CharactersScreen: React.FC<CharactersScreenProps> = ({
             ))}
           </View>
         )}
-      </ScrollView>
+      </BounceScrollView>
     </View>
   );
 };

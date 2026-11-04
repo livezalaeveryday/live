@@ -8,6 +8,7 @@ interface HeaderProps {
   rightActionText?: string;
   onRightAction?: () => void;
   showLogo?: boolean;
+  onBack?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,19 +17,30 @@ export const Header: React.FC<HeaderProps> = ({
   rightActionText,
   onRightAction,
   showLogo = true,
+  onBack,
 }) => {
   return (
     <View style={styles.container}>
       <View style={styles.leftContainer}>
-        {showLogo && (
+        {onBack && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onBack}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <Text style={styles.backArrow}>←</Text>
+          </TouchableOpacity>
+        )}
+        {showLogo && !onBack && (
           <View style={styles.logoBadge}>
             <Text style={styles.logoL}>L</Text>
             <View style={styles.logoDot} />
           </View>
         )}
-        <View>
-          <Text style={styles.title}>{title}</Text>
-          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+        <View style={styles.titleWrapper}>
+          <Text style={styles.title} numberOfLines={1}>{title}</Text>
+          {subtitle && <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text>}
         </View>
       </View>
 
@@ -58,6 +70,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    flex: 1,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#161616',
+    borderWidth: 1,
+    borderColor: '#262626',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backArrow: {
+    color: colors.primary, // Brand Gold #E9A13B
+    fontSize: 20,
+    fontWeight: '800',
+    marginTop: -2,
+  },
+  titleWrapper: {
+    flexShrink: 1,
   },
   logoBadge: {
     width: 34,

@@ -212,7 +212,13 @@ export const PromptPayCheckoutModal: React.FC<PromptPayCheckoutModalProps> = ({
   /* STEP 1: หน้าจอ 'เลือกช่องทางการชำระเงิน' สไตล์ myAIS           */
   /* ============================================================== */
   const renderCheckoutStep = () => (
-    <ScrollView contentContainerStyle={styles.checkoutContent} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={styles.checkoutContent}
+      showsVerticalScrollIndicator={false}
+      bounces={true}
+      alwaysBounceVertical={true}
+      overScrollMode="always"
+    >
       {/* 1. Header */}
       <Text style={styles.modalTitle}>💳 เลือกช่องทางการชำระเงิน</Text>
       <Text style={styles.modalSubtitle}>
