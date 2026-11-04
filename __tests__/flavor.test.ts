@@ -1,5 +1,6 @@
 import { FLAVOR_CONFIGS, DEFAULT_FLAVOR } from '../src/config/flavor';
 import { CREDIT_PACKAGES, createPromptPayOrder } from '../src/config/packages';
+import { THAI_BANKS } from '../src/components/PromptPayCheckoutModal';
 
 describe('Build Flavor & PromptPay Payment Model', () => {
   describe('Build Flavors Configuration', () => {
@@ -52,5 +53,22 @@ describe('Build Flavor & PromptPay Payment Model', () => {
       expect(order.expiresInSeconds).toBe(900);
       expect(order.status).toBe('pending');
     });
+
+    test('THAI_BANKS should have leading Thai banks with deep link schemes', () => {
+      expect(THAI_BANKS.length).toBeGreaterThanOrEqual(6);
+      const bankIds = THAI_BANKS.map((b) => b.id);
+      expect(bankIds).toContain('kplus');
+      expect(bankIds).toContain('scb');
+      expect(bankIds).toContain('ktb');
+      expect(bankIds).toContain('bbl');
+      expect(bankIds).toContain('bay');
+      expect(bankIds).toContain('ttb');
+
+      THAI_BANKS.forEach((bank) => {
+        expect(bank.appScheme).toMatch(/^[a-z]+:\/\//);
+        expect(bank.badgeBg).toBeTruthy();
+      });
+    });
   });
 });
+

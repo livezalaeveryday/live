@@ -80,9 +80,9 @@ npx tsc --noEmit
   *(หรือ `node scripts/set-flavor.js direct` แล้วรัน `cd android; .\gradlew.bat :app:assembleRelease`)*
 - **ตำแหน่งไฟล์ผลลัพธ์ (APK Output):**  
   `F:\livezala-app\android\app\build\outputs\apk\release\app-release.apk`
-- **ขนาดไฟล์จริง (Exact Byte Size):** `55,531,137 bytes` (~52.96 MB)
-- **SHA-256 Checksum:** `FBE3BE151847C7E2626C46706D2C6E088801AECED1C16FDCA0BABDA532332BFE`
-- **การนำไปใช้งาน:** ผู้ประสานงาน (พี่ใหญ่ - Muse) นำไปวางบนศูนย์รวมดาวน์โหลด https://livezala.com/mobileapp เพื่อให้ผู้ใช้ Android ติดตั้งตรงได้ทันที (Flavor: `direct` พร้อมระบบ PromptPay QR และเปิดแอปธนาคารจ่ายทันที)
+- **ขนาดไฟล์จริง (Exact Byte Size):** `55,539,117 bytes` (~52.97 MB)
+- **SHA-256 Checksum:** `C994ADD1D2D71E1F58C4ED495AA11C684744718E97A323A419283AA9F3C45E54`
+- **การนำไปใช้งาน:** ผู้ประสานงาน (พี่ใหญ่ - Muse) นำไปวางบนศูนย์รวมดาวน์โหลด https://livezala.com/mobileapp เพื่อให้ผู้ใช้ Android ติดตั้งตรงได้ทันที (Flavor: `direct` พร้อมระบบเลือกช่องทางชำระเงินสไตล์ myAIS: แท็บแอปธนาคารพร้อมตาราง 6 ธนาคารหลัก App-to-App, บัตรเครดิต, วอลเล็ต, กล่องแจกแจง VAT 7%, และปุ่มซื้อแพ็กเกจเปิดแอปธนาคาร/สร้าง PromptPay QR ทันที)
 
 ### 6.2 Flavor `play`: Build ไฟล์ AAB สำหรับขึ้น Google Play Console (Closed Testing 12 บัญชี)
 - **คุณสมบัติ:** ห้ามมีโฟลว์สั่งซื้อ/จุดชำระเงินดิจิทัลในแอปเด็ดขาด (ป้องกันการถูกปฏิเสธจาก Google Play และ Apple) โดยใช้โมเดล "ปุ่มบอกข้อมูลข้อเท็จจริง" (Informational Button Only: `ช่องทางการซื้อ: เว็บไซต์ livezala.com` ชี้ไปที่หน้าพอร์ทัลสมาชิกหลัก https://livezala.com)
