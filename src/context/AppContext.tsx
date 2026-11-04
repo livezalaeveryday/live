@@ -15,7 +15,7 @@ interface AppContextType {
   flavorConfig: FlavorConfig;
   setFlavor: (flavor: BuildFlavor) => void;
   setActiveCharacter: (char: Character) => void;
-  createPost: (content: string, imageUrl?: string) => void;
+  createPost: (content: string, imageUrl?: string, aspectRatio?: number) => void;
   likePost: (postId: string) => void;
   reportPost: (postId: string, reason: string) => void;
   blockCharacter: (character: Character) => void;
@@ -85,7 +85,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Create post: Owner posts in their own name, showcasing the selected character!
-  const createPost = (content: string, imageUrl?: string) => {
+  const createPost = (content: string, imageUrl?: string, aspectRatio?: number) => {
     const newPost: Post = {
       id: 'post_' + Date.now(),
       ownerId: initialCurrentUser.id,
@@ -97,6 +97,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       character: activeCharacter,
       content,
       imageUrl,
+      aspectRatio,
       likeCount: 0,
       commentCount: 0,
       reportCount: 0,

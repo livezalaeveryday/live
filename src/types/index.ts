@@ -62,6 +62,7 @@ export interface Post {
 
   content: string;
   imageUrl?: string;
+  aspectRatio?: number; // สัดส่วนจริงของภาพ (width / height) แสดงเต็มภาพไม่ตัดขอบ
   likeCount: number;
   isLiked?: boolean;
   commentCount: number;

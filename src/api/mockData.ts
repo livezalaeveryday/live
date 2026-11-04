@@ -146,6 +146,8 @@ export const initialPosts: Post[] = [
     characterId: 'char_yom',
     character: initialCharacters[1],
     content: 'ขอเปิดตัวคาแรคเตอร์ "ท่านยม" ตัวละครที่ผมปั้นไว้สำหรับซีรีส์กรรมออนไลน์ วันนี้ขอบ่นหน่อย มีคนอธิษฐานขอให้เซิร์ฟเวอร์สำนักงานใหญ่ล่ม จะได้ไม่ต้องส่งรายงาน... ขอแจ้งให้ทราบว่าระบบเราใช้ High Availability ล่มไม่ได้ เสียใจด้วยนะ',
+    imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&fit=crop',
+    aspectRatio: 1.777, // สัดส่วนแนวนอน 16:9 แสดงเต็มภาพไม่ตัดขอบ
     likeCount: 89,
     commentCount: 24,
     reportCount: 1,
@@ -161,6 +163,8 @@ export const initialPosts: Post[] = [
     characterId: 'char_rin',
     character: initialCharacters[2],
     content: 'อัปเดตผลงานตัวละคร "เลขาริน" ประจำวันนี้ค่ะ สรุปการประชุมเช้า คิวพิจารณากรรมออนไลน์เปิดตามปกติ ส่วนข้อเสนอขอเบิกชานมไข่มุกในงบพัฒนาบุคลากรถูกระงับชั่วคราว ใครชอบคาแรคเตอร์สายนี้ฝากติดตามผลงานด้วยนะคะ',
+    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&fit=crop',
+    aspectRatio: 1.0, // สัดส่วนจัตุรัส 1:1 แสดงเต็มภาพไม่ตัดขอบ
     likeCount: 65,
     commentCount: 7,
     reportCount: 0,
@@ -176,6 +180,8 @@ export const initialPosts: Post[] = [
     characterId: 'char_yom',
     character: initialCharacters[1],
     content: 'อัปเดต Character DNA ของท่านยมเรียบร้อยแล้ว: กำหนด Visual Style เป็น Dark Charcoal Suit ตัดด้วยเนกไทสีดำสนิท พร้อมท่าทียียวนกวนประสาทแบบผู้คุมบัญชีดิจิทัล ใครมีไอเดียบทสนทนาสนุกๆ ส่งมาคุยกันได้ครับ',
+    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&fit=crop',
+    aspectRatio: 0.75, // สัดส่วนแนวตั้ง 3:4 แสดงเต็มภาพไม่ตัดขอบ
     likeCount: 52,
     commentCount: 12,
     reportCount: 0,

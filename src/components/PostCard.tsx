@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { Post } from '../types';
 import { colors } from '../theme/colors';
@@ -9,6 +9,42 @@ interface PostCardProps {
   post: Post;
   onSelectCharacter?: (characterId: string) => void;
 }
+
+/**
+ * PostImage:
+ * คำสั่งเจ้าของ 2026-11-04 17:15:
+ * รูปโพสต์ในฟีดแอป (ทั้งฟีดสาธารณะและฟีดโปรไฟล์) ต้อง แสดงเต็มภาพ ไม่ตัดขอบ/ไม่ครอปทิ้ง
+ * ไม่ว่าสัดส่วนต้นฉบับจะเป็นแนวตั้ง แนวนอน หรือจัตุรัส — ให้กรอบของรูปปรับตามสัดส่วนจริงของภาพแต่ละใบ ห้ามใช้กรอบขนาดตายตัว
+ */
+const PostImage: React.FC<{ imageUrl: string; aspectRatio?: number }> = ({ imageUrl, aspectRatio }) => {
+  const [ratio, setRatio] = useState<number>(aspectRatio || 1.77);
+
+  useEffect(() => {
+    if (aspectRatio) {
+      setRatio(aspectRatio);
+      return;
+    }
+    Image.getSize(
+      imageUrl,
+      (width, height) => {
+        if (width > 0 && height > 0) {
+          setRatio(width / height);
+        }
+      },
+      () => {}
+    );
+  }, [imageUrl, aspectRatio]);
+
+  return (
+    <View style={styles.postImageContainer}>
+      <Image
+        source={{ uri: imageUrl }}
+        style={[styles.postImage, { aspectRatio: ratio }]}
+        resizeMode="contain"
+      />
+    </View>
+  );
+};
 
 export const PostCard: React.FC<PostCardProps> = ({ post, onSelectCharacter }) => {
   const { likePost, reportPost, blockCharacter, filterText } = useApp();
@@ -129,7 +165,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onSelectCharacter }) =
       </TouchableOpacity>
 
       {post.imageUrl && (
-        <Image source={{ uri: post.imageUrl }} style={styles.postImage} resizeMode="cover" />
+        <PostImage imageUrl={post.imageUrl} aspectRatio={post.aspectRatio} />
       )}
 
       {/* Actions Bar */}
@@ -303,12 +339,20 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     paddingHorizontal: 4,
   },
+  postImageContainer: {
+    width: '100%',
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    overflow: 'hidden',
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   postImage: {
     width: '100%',
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 12,
-    backgroundColor: colors.surfaceElevated,
+    maxWidth: '100%',
   },
   actionsBar: {
     flexDirection: 'row',
