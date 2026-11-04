@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Post, Character, WordFilter, BlockedEntity, DMConversation, DirectMessage } from '../types';
+import { Post, Character, WordFilter, BlockedEntity, DMConversation, DirectMessage, BuildFlavor } from '../types';
 import { initialCharacters, initialPosts, initialWordFilters, initialBlockedEntities, initialConversations } from '../api/mockData';
+import { FlavorConfig, FLAVOR_CONFIGS, DEFAULT_FLAVOR } from '../config/flavor';
 
 interface AppContextType {
   posts: Post[];
@@ -10,6 +11,9 @@ interface AppContextType {
   blockedEntities: BlockedEntity[];
   conversations: DMConversation[];
   activeCharacter: Character; // Character identity currently posting
+  flavor: BuildFlavor;
+  flavorConfig: FlavorConfig;
+  setFlavor: (flavor: BuildFlavor) => void;
   setActiveCharacter: (char: Character) => void;
   createPost: (content: string, imageUrl?: string) => void;
   likePost: (postId: string) => void;
@@ -32,6 +36,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [wordFilters, setWordFilters] = useState<WordFilter[]>(initialWordFilters);
   const [blockedEntities, setBlockedEntities] = useState<BlockedEntity[]>(initialBlockedEntities);
   const [conversations, setConversations] = useState<DMConversation[]>(initialConversations);
+  const [flavor, setFlavor] = useState<BuildFlavor>(DEFAULT_FLAVOR);
+  const flavorConfig = FLAVOR_CONFIGS[flavor];
 
   // Default active character is ท่านยม (User's owned character)
   const myChars = characters.filter((c) => c.isOwner);
@@ -214,6 +220,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         blockedEntities,
         conversations,
         activeCharacter,
+        flavor,
+        flavorConfig,
+        setFlavor,
         setActiveCharacter,
         createPost,
         likePost,

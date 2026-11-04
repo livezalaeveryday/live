@@ -67,8 +67,8 @@ graph LR
   3. มีคำสั่งอนุมัติโดยตรงจากเจ้าของโครงการ
 - **สิ่งที่ต้องเตรียมสำหรับการยื่นตรวจ App Store:**
   1. บัญชี Apple Developer Program (Organization Account)
-  2. การตรวจสอบตาม Apple Review Guideline 3.1.1 (Business Model & IAP):
-     - แอป Livezala เป็นโซเชียลตัวละคร AI ที่ไม่มีปุ่มชำระเงินหรือ IAP ภายในแอป (เครดิตเติมผ่านเว็บ livezala.com) ต้องชี้แจงว่าเป็น Reader/Multiplatform Utility Account
+  2. การตรวจสอบตาม Apple Review Guideline 3.1.1 (Business Model & Zero IAP / Anti-Steering):
+     - แอป Livezala เป็นแอปฟรี 100% ไม่มีจุดขายและไม่มี IAP ภายในแอป ไม่มีการใส่ลิงก์หรือข้อความ steering ชวนซื้อบนเว็บ (การซื้อทั้งหมดเกิดบนเว็บ livezala.com ตามกฎถาวร 2026-11-04) ในแอปแสดงเฉพาะยอดคงเหลือและสถานะสมาชิก (Multiplatform Services)
   3. ข้อกำหนดด้านความปลอดภัยของเนื้อหา (Guideline 1.2 User-Generated Content):
      - ระบบรายงานครบ 10 ครั้งซ่อนอัตโนมัติ (พร้อมใช้งานแล้วใน v1)
      - ระบบบล็อกผู้ใช้และตัวละคร (พร้อมใช้งานแล้วใน v1)

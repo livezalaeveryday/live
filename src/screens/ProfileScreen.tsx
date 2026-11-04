@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Linking, Alert } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { Button } from '../components/Button';
+import { PromptPayCheckoutModal } from '../components/PromptPayCheckoutModal';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 
@@ -15,11 +16,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onOpenWordFilters,
   onOpenBlockedList,
 }) => {
-  const { user, signOut } = useAuth();
-  const { wordFilters, blockedEntities } = useApp();
+  const { user, signOut, updateCredits } = useAuth();
+  const { wordFilters, blockedEntities, flavor, flavorConfig, setFlavor } = useApp();
+  const [showPromptPayModal, setShowPromptPayModal] = useState<boolean>(false);
 
   const handleOpenWebAccount = () => {
-    // คำสั่งเจ้าของ (2026-11-04): ปุ่มบอกข้อมูลเปิดไปหน้าจัดการบัญชีสมาชิกบนเว็บ livezala.com (ไม่ใช่หน้าซื้อ/billing)
+    // คำสั่งเจ้าของ: สำหรับ Flavor 'play' เปิดไปหน้าจัดการบัญชีสมาชิกบนเว็บ livezala.com (ไม่ใช่หน้าซื้อ/billing)
     Linking.openURL('https://livezala.com');
   };
 
@@ -32,6 +34,21 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       { text: 'ยกเลิก', style: 'cancel' },
       { text: 'ออกจากระบบ', style: 'destructive', onPress: signOut },
     ]);
+  };
+
+  const handlePaymentSuccess = (addedCredits: number, packageName: string) => {
+    updateCredits(addedCredits);
+    setShowPromptPayModal(false);
+    Alert.alert(
+      '🎉 เติมเครดิตสำเร็จ!',
+      `ระบบได้เพิ่ม +${addedCredits.toLocaleString()} เครดิตจากแพ็กเกจ "${packageName}" เข้าบัญชีของคุณเรียบร้อยแล้ว`,
+      [{ text: 'ตกลง' }]
+    );
+  };
+
+  const toggleFlavor = () => {
+    const nextFlavor = flavor === 'direct' ? 'play' : 'direct';
+    setFlavor(nextFlavor);
   };
 
   return (
@@ -52,7 +69,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </View>
         </View>
 
-        {/* User Credits & Membership Card (Permanent Rule: 100% Free App, No Point of Sale, No Steering) */}
+        {/* User Credits & Membership Card (Dynamic by Build Flavor: direct vs play) */}
         <View style={styles.creditCard}>
           <View style={styles.creditHeader}>
             <Text style={styles.creditTitle}>🪙 ยอดเครดิตคงเหลือ</Text>
@@ -62,12 +79,44 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             <Text style={styles.membershipLabel}>สถานะสมาชิก:</Text>
             <Text style={styles.membershipValue}>สมาชิก Livezala (Active)</Text>
           </View>
-          <Text style={styles.creditNote}>
-            จัดการบัญชีของคุณที่ livezala.com
-          </Text>
-          <TouchableOpacity style={styles.webInfoButton} onPress={handleOpenWebAccount} activeOpacity={0.8}>
-            <Text style={styles.webInfoButtonText}>ช่องทางการซื้อ: เว็บไซต์ livezala.com</Text>
-          </TouchableOpacity>
+
+          {flavorConfig.allowsInAppPurchase ? (
+            /* Flavor DIRECT: In-App Purchase via PromptPay QR */
+            <View style={styles.directPurchaseBox}>
+              <Text style={styles.directNote}>
+                โหมด APK ตรง (livezala.com/mobileapp): สั่งซื้อและชำระเงินผ่าน PromptPay QR ได้ทันที
+              </Text>
+              <TouchableOpacity
+                style={styles.topUpButton}
+                onPress={() => setShowPromptPayModal(true)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.topUpButtonText}>💳 สั่งซื้อเครดิต (PromptPay QR)</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            /* Flavor PLAY: Store Compliant - Informational Button Only */
+            <View style={styles.playStoreBox}>
+              <Text style={styles.creditNote}>
+                จัดการบัญชีของคุณที่ livezala.com
+              </Text>
+              <TouchableOpacity style={styles.webInfoButton} onPress={handleOpenWebAccount} activeOpacity={0.8}>
+                <Text style={styles.webInfoButtonText}>ช่องทางการซื้อ: เว็บไซต์ livezala.com</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        {/* Build Flavor Switcher & Information (For QA & Testing) */}
+        <View style={styles.flavorCard}>
+          <View style={styles.flavorHeader}>
+            <Text style={styles.flavorBadgeTitle}>🏷️ Build Flavor: {flavorConfig.badge}</Text>
+            <TouchableOpacity style={styles.flavorToggleBadge} onPress={toggleFlavor} activeOpacity={0.7}>
+              <Text style={styles.flavorToggleBadgeText}>สลับ Flavor เทสต์ ⇄</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.flavorDescription}>{flavorConfig.description}</Text>
+          <Text style={styles.flavorChannelText}>ช่องทาง: {flavorConfig.channel}</Text>
         </View>
 
         {/* Safety & Content Settings Group */}
@@ -116,9 +165,16 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         {/* Sign Out Button */}
         <View style={styles.signOutBox}>
           <Button title="ออกจากระบบ" variant="outline" onPress={handleSignOut} />
-          <Text style={styles.versionNote}>live Member App · com.livezala.app · v1.0.0 (Build 1)</Text>
+          <Text style={styles.versionNote}>live Member App · com.livezala.app · v1.0.0 ({flavorConfig.badge})</Text>
         </View>
       </ScrollView>
+
+      {/* AIS / Lazada Style PromptPay Modal for Flavor DIRECT */}
+      <PromptPayCheckoutModal
+        visible={showPromptPayModal}
+        onClose={() => setShowPromptPayModal(false)}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </View>
   );
 };
@@ -207,6 +263,82 @@ const styles = StyleSheet.create({
     color: colors.success,
     fontSize: 12,
     fontWeight: '700',
+  },
+  directPurchaseBox: {
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderLight,
+    paddingTop: 10,
+  },
+  directNote: {
+    color: '#93C5FD',
+    fontSize: 11,
+    lineHeight: 16,
+    marginBottom: 10,
+  },
+  topUpButton: {
+    backgroundColor: '#003D79', // PromptPay Accent Deep Blue
+    borderWidth: 1,
+    borderColor: '#2563EB',
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  topUpButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: 'bold',
+    letterSpacing: 0.3,
+  },
+  playStoreBox: {
+    marginTop: 6,
+  },
+  flavorCard: {
+    backgroundColor: colors.surfaceCard,
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 20,
+  },
+  flavorHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  flavorBadgeTitle: {
+    color: '#60A5FA',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  flavorToggleBadge: {
+    backgroundColor: '#1E293B',
+    borderWidth: 1,
+    borderColor: '#60A5FA',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  flavorToggleBadgeText: {
+    color: '#93C5FD',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  flavorDescription: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    lineHeight: 16,
+    marginBottom: 4,
+  },
+  flavorChannelText: {
+    color: colors.textMuted,
+    fontSize: 10,
   },
   creditNote: {
     color: colors.textMuted,

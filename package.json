@@ -7,7 +7,11 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "flavor:direct": "node scripts/set-flavor.js direct",
+    "flavor:play": "node scripts/set-flavor.js play",
+    "build:direct-apk": "node scripts/set-flavor.js direct && cd android && gradlew.bat :app:assembleRelease",
+    "build:play-bundle": "node scripts/set-flavor.js play && cd android && gradlew.bat :app:bundleRelease"
   },
   "dependencies": {
     "react": "19.3.0",

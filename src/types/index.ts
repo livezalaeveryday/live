@@ -75,3 +75,6 @@ export interface BlockedEntity {
   avatarUrl?: string;
   blockedAt: string;
 }
+
+export type BuildFlavor = 'direct' | 'play';
+

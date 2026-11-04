@@ -66,26 +66,33 @@ npx tsc --noEmit
 
 ---
 
-## 6. คำสั่ง Build ฝั่ง Android (Local Build)
+## 6. คำสั่ง Build ฝั่ง Android แยกตาม 2 Build Flavors (คำสั่งเจ้าของ 2026-11-04)
 
-### 6.1 Build ไฟล์ AAB (Android App Bundle) สำหรับ Google Play Store
-```powershell
-cd "F:\livezala-app\android"
-.\gradlew.bat :app:bundleRelease
-```
-- **ตำแหน่งไฟล์ผลลัพธ์ (AAB Output):**  
-  `F:\livezala-app\android\app\build\outputs\bundle\release\app-release.aab`
+โครงการรองรับการแยกเป็น 2 Build Flavor จากโค้ดชุดเดียวกันด้วย Flag:
 
-### 6.2 Build ไฟล์ APK สำหรับรันบนเครื่องจริงหรือติดตั้งตรง (Direct Install / livezala.com/mobileapp)
-```powershell
-cd "F:\livezala-app\android"
-.\gradlew.bat :app:assembleRelease
-```
+### 6.1 Flavor `direct`: Build ไฟล์ APK สำหรับแจกผ่าน livezala.com/mobileapp (สไตล์ AIS/Lazada)
+- **คุณสมบัติ:** ไม่ผูกกฎ Google Play มีระบบสั่งซื้อเครดิตและสร้าง PromptPay QR Code ไดนามิก พร้อมปุ่มเปิดแอปธนาคาร (App-to-App: K PLUS, SCB EASY, Krungthai NEXT ฯลฯ) หรือบันทึกภาพ QR เพื่อสแกน และระบบยืนยันยอดเงินผ่าน Webhook อัตโนมัติ
+- **คำสั่ง Build One-Liner:**
+  ```powershell
+  cd "F:\livezala-app"
+  npm run build:direct-apk
+  ```
+  *(หรือ `node scripts/set-flavor.js direct` แล้วรัน `cd android; .\gradlew.bat :app:assembleRelease`)*
 - **ตำแหน่งไฟล์ผลลัพธ์ (APK Output):**  
   `F:\livezala-app\android\app\build\outputs\apk\release\app-release.apk`
-- **ขนาดไฟล์จริง:** `55,511,153 bytes` (~52.94 MB)
-- **SHA-256 Checksum:** `1650eabe81ea27aa78328930e7ed7637e1a9774eb988064014ac73af830f1337`
-- **การนำไปใช้งาน:** ผู้ประสานงาน (พี่ใหญ่) นำไปวางบนศูนย์รวมดาวน์โหลด https://livezala.com/mobileapp เพื่อให้ผู้ใช้ Android ติดตั้งตรงได้ทันทีก่อนขึ้น Google Play Store ตามคำสั่งเจ้าของ
+- **การนำไปใช้งาน:** ผู้ประสานงาน (พี่ใหญ่ - Muse) นำไปวางบนศูนย์รวมดาวน์โหลด https://livezala.com/mobileapp
+
+### 6.2 Flavor `play`: Build ไฟล์ AAB สำหรับขึ้น Google Play Console (Closed Testing 12 บัญชี)
+- **คุณสมบัติ:** ห้ามมีโฟลว์สั่งซื้อ/จุดชำระเงินดิจิทัลในแอปเด็ดขาด (ป้องกันการถูกปฏิเสธจาก Google Play และ Apple) โดยใช้โมเดล "ปุ่มบอกข้อมูลข้อเท็จจริง" (Informational Button Only: `ช่องทางการซื้อ: เว็บไซต์ livezala.com` ชี้ไปที่หน้าพอร์ทัลสมาชิกหลัก https://livezala.com)
+- **คำสั่ง Build One-Liner:**
+  ```powershell
+  cd "F:\livezala-app"
+  npm run build:play-bundle
+  ```
+  *(หรือ `node scripts/set-flavor.js play` แล้วรัน `cd android; .\gradlew.bat :app:bundleRelease`)*
+- **ตำแหน่งไฟล์ผลลัพธ์ (AAB Output):**  
+  `F:\livezala-app\android\app\build\outputs\bundle\release\app-release.aab`
+- **การนำไปใช้งาน:** ส่งมอบให้พี่ใหญ่ (Muse) และฝ่าย QA (FSD-32) สำหรับ Closed Testing 12 บัญชี 14 วัน
 
 ---
 
