@@ -229,7 +229,14 @@ export const PromptPayCheckoutModal: React.FC<PromptPayCheckoutModalProps> = ({
       <View style={styles.sectionHeaderRow}>
         <Text style={styles.sectionTitle}>1. เลือกแพ็กเกจเครดิต</Text>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.packagePillsScroll}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.packagePillsScroll}
+        bounces={true}
+        alwaysBounceHorizontal={true}
+        overScrollMode="always"
+      >
         {CREDIT_PACKAGES.map((pkg) => {
           const isSelected = selectedPackage.id === pkg.id;
           return (
@@ -406,7 +413,13 @@ export const PromptPayCheckoutModal: React.FC<PromptPayCheckoutModalProps> = ({
   /* STEP 2: หน้าจอแสดง PromptPay QR Card & Deep link App-to-App   */
   /* ============================================================== */
   const renderQrStep = () => (
-    <ScrollView contentContainerStyle={styles.qrScrollContent} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={styles.qrScrollContent}
+      showsVerticalScrollIndicator={false}
+      bounces={true}
+      alwaysBounceVertical={true}
+      overScrollMode="always"
+    >
       <Text style={styles.modalTitle}>📱 ชำระเงินด้วย PromptPay QR</Text>
       <Text style={styles.modalSubtitle}>
         เปิดแอปธนาคารของคุณเพื่อจ่ายเงินทันที หรือสแกน QR ด้านล่าง

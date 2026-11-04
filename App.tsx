@@ -86,16 +86,16 @@ const MainNavigator: React.FC = () => {
   // Gesture PanResponder for horizontal back swipe (iOS & Android edge swipe)
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
+      onStartShouldSetPanResponderCapture: () => false,
+      onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
         // Only intercept swipe gesture when there are sub-screens in the stack
         if (stackRef.current.length === 0) {
           return false;
         }
         // Touch starting near left edge (<= 50px) and moving horizontally to the right
-        const isFromLeftEdge = evt.nativeEvent.pageX <= 50 || gestureState.x0 <= 50;
+        const isFromLeftEdge = evt.nativeEvent.pageX <= 50;
         const isHorizontalRightSwipe =
-          gestureState.dx > 15 &&
+          gestureState.dx > 12 &&
           Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 1.5;
 
         return isFromLeftEdge && isHorizontalRightSwipe;
