@@ -18,7 +18,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const { user, signOut } = useAuth();
   const { wordFilters, blockedEntities } = useApp();
 
-  const handleOpenWebCredits = () => {
+  const handleOpenWebAccount = () => {
+    // คำสั่งเจ้าของ (2026-11-04): ปุ่มบอกข้อมูลเปิดไปหน้าจัดการบัญชีสมาชิกบนเว็บ livezala.com (ไม่ใช่หน้าซื้อ/billing)
     Linking.openURL('https://livezala.com');
   };
 
@@ -51,17 +52,21 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </View>
         </View>
 
-        {/* Web Credits Card (Strict No-IAP Rule) */}
+        {/* User Credits & Membership Card (Permanent Rule: 100% Free App, No Point of Sale, No Steering) */}
         <View style={styles.creditCard}>
           <View style={styles.creditHeader}>
-            <Text style={styles.creditTitle}>🪙 ยอดเครดิตคงเหลือในระบบ</Text>
+            <Text style={styles.creditTitle}>🪙 ยอดเครดิตคงเหลือ</Text>
             <Text style={styles.creditAmount}>{user?.credits.toLocaleString() || '0'} เครดิต</Text>
           </View>
+          <View style={styles.membershipRow}>
+            <Text style={styles.membershipLabel}>สถานะสมาชิก:</Text>
+            <Text style={styles.membershipValue}>สมาชิก Livezala (Active)</Text>
+          </View>
           <Text style={styles.creditNote}>
-            กฎระบบ v1: เครดิตและแพ็กเกจสมาชิกทั้งหมดซื้อผ่านหน้าเว็บ livezala.com เท่านั้น เครดิตที่ซื้อสามารถนำมาใช้ร่วมกับแอปนี้ได้ (ไม่มีการเรียกเก็บเงินภายในแอป)
+            จัดการบัญชีของคุณที่ livezala.com
           </Text>
-          <TouchableOpacity style={styles.webButton} onPress={handleOpenWebCredits} activeOpacity={0.8}>
-            <Text style={styles.webButtonText}>🌐 จัดการแพ็กเกจบน livezala.com</Text>
+          <TouchableOpacity style={styles.webInfoButton} onPress={handleOpenWebAccount} activeOpacity={0.8}>
+            <Text style={styles.webInfoButtonText}>ช่องทางการซื้อ: เว็บไซต์ livezala.com</Text>
           </TouchableOpacity>
         </View>
 
@@ -188,24 +193,44 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
   },
+  membershipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  membershipLabel: {
+    color: colors.textSecondary,
+    fontSize: 12,
+  },
+  membershipValue: {
+    color: colors.success,
+    fontSize: 12,
+    fontWeight: '700',
+  },
   creditNote: {
     color: colors.textMuted,
     fontSize: 12,
-    lineHeight: 17,
-    marginBottom: 12,
+    lineHeight: 18,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderLight,
+    paddingTop: 8,
+    marginTop: 4,
   },
-  webButton: {
-    backgroundColor: 'rgba(255, 107, 0, 0.1)',
+  webInfoButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.borderLight,
     borderRadius: 8,
-    paddingVertical: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 10,
     alignItems: 'center',
   },
-  webButtonText: {
-    color: colors.primary,
-    fontWeight: '700',
-    fontSize: 13,
+  webInfoButtonText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
   },
   groupHeader: {
     color: colors.textSecondary,
