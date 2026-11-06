@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import { PostCard } from '../components/PostCard';
+import { BounceScrollView } from '../components/BounceView';
 import { useApp } from '../context/AppContext';
 
 interface CharacterDetailScreenProps {
@@ -24,12 +25,14 @@ export const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({
   if (!character) {
     return (
       <View style={styles.container}>
-        <Header title="ไม่พบตัวละคร" rightActionText="กลับ" onRightAction={onBack} showLogo={false} />
+        <Header title="ไม่พบตัวละคร" rightActionText="กลับ" onRightAction={onBack} onBack={onBack} showLogo={false} />
       </View>
     );
   }
 
-  const isMutual = character.isFollowing && character.isFollowerOfMe;
+  const isMutual = (character.isOwnerFollowing ?? character.isFollowing) &&
+                   (character.isOwnerFollowerOfMe ?? character.isFollowerOfMe);
+  const isFollowingOwner = character.isOwnerFollowing ?? character.isFollowing;
   const characterPosts = posts.filter((p) => p.characterId === character.id);
 
   const handleFollowPress = () => {
@@ -63,80 +66,109 @@ export const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({
     <View style={styles.container}>
       <Header
         title={character.name}
-        subtitle={character.handle}
+        subtitle={`ผลงานสร้างสรรค์โดย ${character.ownerName}`}
         rightActionText="ย้อนกลับ"
         onRightAction={onBack}
+        onBack={onBack}
         showLogo={false}
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <BounceScrollView contentContainerStyle={styles.content}>
         {/* Cover / Profile Banner */}
         <View style={styles.bannerContainer}>
           <View style={styles.bannerBackground} />
           <Image source={{ uri: character.avatarUrl }} style={styles.largeAvatar} />
         </View>
 
-        {/* Profile Info Header */}
+        {/* Character Info Card */}
         <View style={styles.profileHeader}>
           <View style={styles.titleRow}>
             <Text style={styles.name}>{character.name}</Text>
-            {character.isOfficial && <Badge label="OFFICIAL" variant="official" />}
-            {character.isOwner && <Badge label="ตัวละครของฉัน" variant="primary" />}
+            {character.isOfficial ? (
+              <Badge label="OFFICIAL" variant="official" />
+            ) : character.isOwner ? (
+              <Badge label="ผลงานของฉัน" variant="gold" />
+            ) : (
+              <Badge label="ผลงานสมาชิก" variant="muted" />
+            )}
           </View>
           <Text style={styles.handle}>{character.handle}</Text>
 
           <Text style={styles.bio}>{character.bio}</Text>
 
-          {/* Stats Bar */}
-          <View style={styles.statsBar}>
-            <Text style={styles.statItem}>
-              <Text style={styles.statBold}>{character.followerCount.toLocaleString()} </Text>
-              ผู้ติดตาม
-            </Text>
-            <Text style={styles.statItem}>
-              <Text style={styles.statBold}>{character.followingCount.toLocaleString()} </Text>
-              กำลังติดตาม
-            </Text>
-          </View>
-
-          {/* Action Buttons Row */}
-          <View style={styles.actionRow}>
-            {character.isOfficial ? (
-              <View style={styles.officialLockedButton}>
-                <Text style={styles.officialLockedText}>🔒 สมาชิกทุกคนติดตาม @live สองทางโดยอัตโนมัติ</Text>
-              </View>
-            ) : (
-              <Button
-                title={character.isFollowing ? 'กำลังติดตาม' : '+ ติดตาม'}
-                variant={character.isFollowing ? 'outline' : 'primary'}
-                onPress={handleFollowPress}
-                style={styles.actionBtn}
+          {/* Model Alignment: Owner Profile Card (ความสัมพันธ์ติดตาม/DM เป็นระดับผู้ใช้ ตัวละครคือผลงานใต้บัญชีเจ้าของ) */}
+          <View style={styles.ownerCard}>
+            <View style={styles.ownerTopRow}>
+              <Image
+                source={{
+                  uri:
+                    character.ownerAvatarUrl ||
+                    'https://livezala.com/media/avatar/default',
+                }}
+                style={styles.ownerAvatar}
               />
-            )}
+              <View style={styles.ownerInfo}>
+                <Text style={styles.ownerTag}>👤 เจ้าของผลงาน (Creator):</Text>
+                <Text style={styles.ownerName}>{character.ownerName}</Text>
+                {character.ownerHandle && (
+                  <Text style={styles.ownerHandle}>{character.ownerHandle}</Text>
+                )}
+              </View>
+            </View>
 
-            {/* DM Button with Mutual Check */}
-            <TouchableOpacity
-              style={[styles.dmActionButton, !isMutual && styles.dmActionButtonDisabled]}
-              onPress={() => {
-                if (isMutual) {
-                  onOpenDM(character.id);
-                } else {
-                  Alert.alert(
-                    'ไม่สามารถส่งข้อความได้',
-                    'ตามกฎความปลอดภัยของระบบ: คุณจะสามารถเริ่มส่งข้อความ (DM) ได้ต่อเมื่อทั้งสองฝ่ายกดติดตามซึ่งกันและกันแล้วเท่านั้น'
-                  );
-                }
-              }}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.dmActionText, !isMutual && styles.dmActionTextDisabled]}>
-                {isMutual ? '💬 ส่งข้อความ (DM)' : '🔒 ต้องติดตามกันสองฝ่าย'}
-              </Text>
-            </TouchableOpacity>
+            <Text style={styles.ownerDescription}>
+              ตัวละครนี้สร้างและเผยแพร่ภายใต้บัญชีสมาชิก Livezala ของ {character.ownerName}
+            </Text>
 
-            <TouchableOpacity style={styles.blockBtn} onPress={handleBlockPress} activeOpacity={0.7}>
-              <Text style={styles.blockBtnText}>🚫 บล็อก</Text>
-            </TouchableOpacity>
+            {/* Action Buttons: ติดตามและ DM ระดับผู้ใช้ (เจ้าของ) */}
+            <View style={styles.actionRow}>
+              {character.isOfficial ? (
+                <View style={styles.officialLockedButton}>
+                  <Text style={styles.officialLockedText}>
+                    🔒 สมาชิกทุกคนติดตาม @live สองทางโดยอัตโนมัติ
+                  </Text>
+                </View>
+              ) : character.isOwner ? (
+                <View style={styles.myOwnershipBox}>
+                  <Text style={styles.myOwnershipText}>
+                    🌟 ตัวละครนี้เป็นผลงานของคุณเอง นำเสนอใต้บัญชีของคุณ
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  <Button
+                    title={isFollowingOwner ? 'กำลังติดตามเจ้าของ' : '+ ติดตามเจ้าของ'}
+                    variant={isFollowingOwner ? 'outline' : 'primary'}
+                    onPress={handleFollowPress}
+                    style={styles.actionBtn}
+                  />
+
+                  {/* DM Button with Mutual Check ระดับผู้ใช้ */}
+                  <TouchableOpacity
+                    style={[styles.dmActionButton, !isMutual && styles.dmActionButtonDisabled]}
+                    onPress={() => {
+                      if (isMutual) {
+                        onOpenDM(character.id);
+                      } else {
+                        Alert.alert(
+                          'การส่งข้อความระหว่างสมาชิก',
+                          `ตามกฎความปลอดภัย: ส่งข้อความถึงเจ้าของ (${character.ownerName}) ได้เมื่อทั้งสองฝ่ายกดติดตามกันแล้วเท่านั้น`
+                        );
+                      }
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[styles.dmActionText, !isMutual && styles.dmActionTextDisabled]}>
+                      {isMutual ? '💬 ข้อความถึงเจ้าของ' : '🔒 ต้องติดตามกันสองฝ่าย'}
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              <TouchableOpacity style={styles.blockBtn} onPress={handleBlockPress} activeOpacity={0.7}>
+                <Text style={styles.blockBtnText}>🚫 บล็อก</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -163,16 +195,16 @@ export const CharacterDetailScreen: React.FC<CharacterDetailScreenProps> = ({
           </View>
         </View>
 
-        {/* Posts by this character */}
+        {/* Posts showcasing this character */}
         <View style={styles.postsSection}>
-          <Text style={styles.sectionHeader}>📝 โพสต์ในฟีดแอป ({characterPosts.length})</Text>
+          <Text style={styles.sectionHeader}>📝 โพสต์อวดตัวละครนี้บนฟีด ({characterPosts.length})</Text>
           {characterPosts.length === 0 ? (
-            <Text style={styles.noPostsText}>ตัวละครนี้ยังไม่มีโพสต์ในฟีดแอป</Text>
+            <Text style={styles.noPostsText}>ยังไม่มีโพสต์อวดตัวละครนี้บนฟีด</Text>
           ) : (
             characterPosts.map((post) => <PostCard key={post.id} post={post} />)
           )}
         </View>
-      </ScrollView>
+      </BounceScrollView>
     </View>
   );
 };
@@ -217,6 +249,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flexWrap: 'wrap',
   },
   name: {
     color: colors.text,
@@ -224,7 +257,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   handle: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontSize: 13,
     marginTop: 2,
     marginBottom: 10,
@@ -235,18 +268,49 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 14,
   },
-  statsBar: {
+  ownerCard: {
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.badgeBorder,
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 6,
+  },
+  ownerTopRow: {
     flexDirection: 'row',
-    gap: 20,
-    marginBottom: 16,
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
   },
-  statItem: {
-    color: colors.textMuted,
-    fontSize: 13,
+  ownerAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
   },
-  statBold: {
-    color: colors.text,
+  ownerInfo: {
+    flex: 1,
+  },
+  ownerTag: {
+    color: colors.primary,
+    fontSize: 11,
     fontWeight: '700',
+  },
+  ownerName: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  ownerHandle: {
+    color: colors.textSecondary,
+    fontSize: 11,
+  },
+  ownerDescription: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    lineHeight: 16,
+    marginBottom: 12,
   },
   actionRow: {
     flexDirection: 'row',
@@ -258,51 +322,65 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 120,
   },
+  myOwnershipBox: {
+    flex: 1,
+    backgroundColor: colors.badgeBg,
+    borderWidth: 1,
+    borderColor: colors.badgeBorder,
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  myOwnershipText: {
+    color: colors.badgeText,
+    fontSize: 12,
+    fontWeight: '600',
+  },
   officialLockedButton: {
     flex: 1,
-    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+    backgroundColor: colors.badgeBg,
     borderWidth: 1,
-    borderColor: colors.info,
+    borderColor: colors.badgeBorder,
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
   officialLockedText: {
-    color: colors.info,
+    color: colors.badgeText,
     fontSize: 12,
     fontWeight: '700',
   },
   dmActionButton: {
-    backgroundColor: colors.primaryMuted,
+    backgroundColor: colors.badgeBg,
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.badgeBorder,
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 8,
   },
   dmActionButtonDisabled: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.surfaceCard,
     borderColor: colors.border,
   },
   dmActionText: {
     color: colors.primary,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
   dmActionTextDisabled: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
   },
   blockBtn: {
     paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
   },
   blockBtnText: {
     color: colors.danger,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
   },
   dnaSection: {
@@ -343,7 +421,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   noPostsText: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontSize: 13,
     textAlign: 'center',
     paddingVertical: 24,

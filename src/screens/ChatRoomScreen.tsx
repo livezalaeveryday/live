@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
+import { BounceFlatList } from '../components/BounceView';
 import { useApp } from '../context/AppContext';
 
 interface ChatRoomScreenProps {
@@ -35,7 +36,7 @@ export const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ characterId, onB
   if (!character) {
     return (
       <View style={styles.container}>
-        <Header title="ไม่พบตัวละคร" rightActionText="กลับ" onRightAction={onBack} showLogo={false} />
+        <Header title="ไม่พบตัวละคร" rightActionText="กลับ" onRightAction={onBack} onBack={onBack} showLogo={false} />
       </View>
     );
   }
@@ -87,11 +88,12 @@ export const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ characterId, onB
         subtitle={isMutual ? '🟢 กำลังเชื่อมต่อ (Mutual Follow)' : '🔴 ขาดการติดตามสองทาง'}
         rightActionText="บล็อก"
         onRightAction={handleBlock}
+        onBack={onBack}
         showLogo={false}
       />
 
       {/* Messages Feed */}
-      <FlatList
+      <BounceFlatList
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (

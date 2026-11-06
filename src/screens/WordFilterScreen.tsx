@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { Button } from '../components/Button';
+import { BounceFlatList } from '../components/BounceView';
 import { useApp } from '../context/AppContext';
 
 interface WordFilterScreenProps {
@@ -34,6 +35,7 @@ export const WordFilterScreen: React.FC<WordFilterScreenProps> = ({ onBack }) =>
         subtitle="ซ่อนหรือเซนเซอร์คำที่ไม่ต้องการเห็น"
         rightActionText="เสร็จสิ้น"
         onRightAction={onBack}
+        onBack={onBack}
         showLogo={false}
       />
 
@@ -64,7 +66,7 @@ export const WordFilterScreen: React.FC<WordFilterScreenProps> = ({ onBack }) =>
 
         {/* Word Filters List */}
         <Text style={styles.listHeader}>รายการคำที่กำลังกรอง ({wordFilters.length} คำ)</Text>
-        <FlatList
+        <BounceFlatList
           data={wordFilters}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (

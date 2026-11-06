@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { Post } from '../types';
 import { colors } from '../theme/colors';
@@ -9,6 +9,48 @@ interface PostCardProps {
   post: Post;
   onSelectCharacter?: (characterId: string) => void;
 }
+
+/**
+ * PostImage:
+ * คำสั่งเจ้าของ 2026-11-04 17:15:
+ * รูปโพสต์ในฟีดแอป (ทั้งฟีดสาธารณะและฟีดโปรไฟล์) ต้อง แสดงเต็มภาพ ไม่ตัดขอบ/ไม่ครอปทิ้ง
+ * ไม่ว่าสัดส่วนต้นฉบับจะเป็นแนวตั้ง แนวนอน หรือจัตุรัส — ให้กรอบของรูปปรับตามสัดส่วนจริงของภาพแต่ละใบ ห้ามใช้กรอบขนาดตายตัว
+ */
+const PostImage: React.FC<{ imageUrl: string; aspectRatio?: number }> = ({ imageUrl, aspectRatio }) => {
+  const [ratio, setRatio] = useState<number>(aspectRatio || 1.77);
+
+  useEffect(() => {
+    if (aspectRatio) {
+      setRatio(aspectRatio);
+      return;
+    }
+    Image.getSize(
+      imageUrl,
+      (width, height) => {
+        if (width > 0 && height > 0) {
+          setRatio(width / height);
+        }
+      },
+      () => {}
+    );
+  }, [imageUrl, aspectRatio]);
+
+  return (
+    <View style={styles.postImageContainer}>
+      <Image
+        source={{ uri: imageUrl }}
+        style={[styles.postImage, { aspectRatio: ratio }]}
+        resizeMode="contain"
+        onLoad={(e) => {
+          const { width, height } = e.nativeEvent.source;
+          if (width > 0 && height > 0) {
+            setRatio(width / height);
+          }
+        }}
+      />
+    </View>
+  );
+};
 
 export const PostCard: React.FC<PostCardProps> = ({ post, onSelectCharacter }) => {
   const { likePost, reportPost, blockCharacter, filterText } = useApp();
@@ -56,21 +98,28 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onSelectCharacter }) =
 
   return (
     <View style={styles.card}>
-      {/* Header */}
+      {/* Header: Owner Posting in Their Own Name */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.authorRow}
           onPress={() => onSelectCharacter && onSelectCharacter(post.character.id)}
           activeOpacity={0.8}
         >
-          <Image source={{ uri: post.character.avatarUrl }} style={styles.avatar} />
-          <View>
+          <Image
+            source={{ uri: post.ownerAvatarUrl || post.character.avatarUrl }}
+            style={styles.avatar}
+          />
+          <View style={styles.authorInfo}>
             <View style={styles.nameRow}>
-              <Text style={styles.name}>{post.character.name}</Text>
-              {post.character.isOfficial && <Badge label="OFFICIAL" variant="official" />}
+              <Text style={styles.name}>{post.ownerName || post.character.name}</Text>
+              {post.isOfficialOwner || post.character.isOfficial ? (
+                <Badge label="OFFICIAL" variant="official" />
+              ) : (
+                <Badge label="เจ้าของผลงาน" variant="gold" />
+              )}
             </View>
             <Text style={styles.handle}>
-              {post.character.handle} · {post.createdAt}
+              {post.ownerHandle || post.character.handle} · {post.createdAt}
             </Text>
           </View>
         </TouchableOpacity>
@@ -89,7 +138,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onSelectCharacter }) =
       {menuVisible && (
         <View style={styles.menuDropdown}>
           <TouchableOpacity style={styles.menuItem} onPress={handleBlock}>
-            <Text style={styles.menuItemTextDanger}>🚫 บล็อกตัวละครนี้</Text>
+            <Text style={styles.menuItemTextDanger}>🚫 บล็อกตัวละครนี้ ({post.character.name})</Text>
           </TouchableOpacity>
           <View style={styles.menuDivider} />
           <TouchableOpacity style={styles.menuItem} onPress={handleReport}>
@@ -101,8 +150,28 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onSelectCharacter }) =
       {/* Body Content */}
       <Text style={styles.content}>{filteredContent}</Text>
 
+      {/* Character Showcase Card: 'เลือกตัวละครของตัวเองมาโพสต์ลงฟีด เพื่ออวด' */}
+      <TouchableOpacity
+        style={styles.showcaseCard}
+        onPress={() => onSelectCharacter && onSelectCharacter(post.character.id)}
+        activeOpacity={0.85}
+      >
+        <Image source={{ uri: post.character.avatarUrl }} style={styles.showcaseAvatar} />
+        <View style={styles.showcaseContent}>
+          <View style={styles.showcaseTagRow}>
+            <Text style={styles.showcaseBadgeText}>🎭 ตัวละครที่นำเสนอ:</Text>
+            <Text style={styles.showcaseCharName}>{post.character.name}</Text>
+            <Text style={styles.showcaseCharHandle}>{post.character.handle}</Text>
+          </View>
+          <Text style={styles.showcaseCharBio} numberOfLines={1}>
+            {post.character.bio}
+          </Text>
+        </View>
+        <Text style={styles.showcaseArrow}>ดูผลงาน ›</Text>
+      </TouchableOpacity>
+
       {post.imageUrl && (
-        <Image source={{ uri: post.imageUrl }} style={styles.postImage} resizeMode="cover" />
+        <PostImage imageUrl={post.imageUrl} aspectRatio={post.aspectRatio} />
       )}
 
       {/* Actions Bar */}
@@ -147,12 +216,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   authorRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
     flex: 1,
   },
   avatar: {
@@ -160,13 +229,16 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+  },
+  authorInfo: {
+    flex: 1,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   name: {
     color: colors.text,
@@ -174,7 +246,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   handle: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontSize: 12,
     marginTop: 2,
   },
@@ -198,7 +270,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 8,
   },
@@ -221,12 +293,72 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 12,
   },
+  showcaseCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.badgeBorder,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+    gap: 10,
+  },
+  showcaseAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+  },
+  showcaseContent: {
+    flex: 1,
+  },
+  showcaseTagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexWrap: 'wrap',
+  },
+  showcaseBadgeText: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  showcaseCharName: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  showcaseCharHandle: {
+    color: colors.textSecondary,
+    fontSize: 11,
+  },
+  showcaseCharBio: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  showcaseArrow: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '700',
+    paddingHorizontal: 4,
+  },
+  postImageContainer: {
+    width: '100%',
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    overflow: 'hidden',
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   postImage: {
     width: '100%',
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 12,
-    backgroundColor: colors.surfaceElevated,
+    maxWidth: '100%',
   },
   actionsBar: {
     flexDirection: 'row',

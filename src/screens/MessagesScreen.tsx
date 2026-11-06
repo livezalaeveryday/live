@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';
 import { Header } from '../components/Header';
 import { Badge } from '../components/Badge';
+import { BounceFlatList } from '../components/BounceView';
 import { useApp } from '../context/AppContext';
 
 interface MessagesScreenProps {
@@ -16,18 +17,18 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({ onOpenChat }) =>
     <View style={styles.container}>
       <Header
         title="ข้อความส่วนตัว (DM)"
-        subtitle="เฉพาะผู้ติดตามกันสองฝ่ายเท่านั้น"
+        subtitle="การส่งข้อความระหว่างสมาชิก (DM ระดับผู้ใช้)"
         showLogo
       />
 
       {/* Info notice */}
       <View style={styles.infoBanner}>
         <Text style={styles.infoText}>
-          🔒 กฎความปลอดภัย v1: เปิดให้ส่งข้อความคุยกันได้เฉพาะระหว่างตัวละครที่มีการติดตามซึ่งกันและกัน (Mutual Follow)
+          🔒 กฎความปลอดภัย: ส่งข้อความส่วนตัวได้ระหว่างสมาชิกที่มีการติดตามซึ่งกันและกัน (Mutual Follow)
         </Text>
       </View>
 
-      <FlatList
+      <BounceFlatList
         data={conversations}
         keyExtractor={(item) => item.characterId}
         renderItem={({ item }) => (
@@ -77,14 +78,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   infoBanner: {
-    backgroundColor: 'rgba(255, 107, 0, 0.08)',
+    backgroundColor: colors.badgeBg,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.badgeBorder,
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
   infoText: {
-    color: colors.primary,
+    color: colors.badgeText,
     fontSize: 12,
     lineHeight: 16,
     fontWeight: '600',

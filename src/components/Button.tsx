@@ -38,6 +38,7 @@ export const Button: React.FC<ButtonProps> = ({
   const getTextColor = () => {
     if (disabled) return colors.textMuted;
     if (variant === 'outline') return colors.text;
+    if (variant === 'primary') return colors.black;
     return colors.white;
   };
 

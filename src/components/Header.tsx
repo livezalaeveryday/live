@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { colors } from '../theme/colors';
 
 interface HeaderProps {
@@ -8,6 +8,7 @@ interface HeaderProps {
   rightActionText?: string;
   onRightAction?: () => void;
   showLogo?: boolean;
+  onBack?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,19 +17,30 @@ export const Header: React.FC<HeaderProps> = ({
   rightActionText,
   onRightAction,
   showLogo = true,
+  onBack,
 }) => {
   return (
     <View style={styles.container}>
       <View style={styles.leftContainer}>
-        {showLogo && (
+        {onBack && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onBack}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <Text style={styles.backArrow}>←</Text>
+          </TouchableOpacity>
+        )}
+        {showLogo && !onBack && (
           <View style={styles.logoBadge}>
             <Text style={styles.logoL}>L</Text>
             <View style={styles.logoDot} />
           </View>
         )}
-        <View>
-          <Text style={styles.title}>{title}</Text>
-          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+        <View style={styles.titleWrapper}>
+          <Text style={styles.title} numberOfLines={1}>{title}</Text>
+          {subtitle && <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text>}
         </View>
       </View>
 
@@ -43,7 +55,9 @@ export const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    height: 60,
+    paddingTop: Platform.OS === 'ios' ? 54 : 16,
+    paddingBottom: 12,
+    minHeight: Platform.OS === 'ios' ? 104 : 72,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -56,29 +70,49 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    flex: 1,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#161616',
+    borderWidth: 1,
+    borderColor: '#262626',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backArrow: {
+    color: colors.primary, // Brand Gold #E9A13B
+    fontSize: 20,
+    fontWeight: '800',
+    marginTop: -2,
+  },
+  titleWrapper: {
+    flexShrink: 1,
   },
   logoBadge: {
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
     borderRadius: 8,
-    backgroundColor: '#0F172A',
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: '#161616',
+    borderWidth: 1.5,
+    borderColor: '#4A3512',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
   },
   logoL: {
-    color: '#FFFFFF',
+    color: '#F5F5F5',
     fontWeight: '800',
     fontSize: 18,
     fontFamily: 'monospace',
   },
   logoDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.primary,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: colors.logoOrange, // สีส้ม #FF8A3D เฉพาะจุดในโลโก้เท่านั้น
     position: 'absolute',
     top: 6,
     right: 6,
@@ -90,18 +124,19 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   subtitle: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontSize: 11,
+    marginTop: 2,
   },
   rightButton: {
     backgroundColor: colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 8,
   },
   rightButtonText: {
-    color: colors.white,
-    fontWeight: '600',
+    color: colors.black,
+    fontWeight: '700',
     fontSize: 13,
   },
 });

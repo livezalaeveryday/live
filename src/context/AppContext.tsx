@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Post, Character, WordFilter, BlockedEntity, DMConversation, DirectMessage } from '../types';
-import { initialCharacters, initialPosts, initialWordFilters, initialBlockedEntities, initialConversations } from '../api/mockData';
+import { Post, Character, WordFilter, BlockedEntity, DMConversation, DirectMessage, BuildFlavor } from '../types';
+import { initialCharacters, initialPosts, initialWordFilters, initialBlockedEntities, initialConversations, initialCurrentUser } from '../api/mockData';
+import { FlavorConfig, FLAVOR_CONFIGS, DEFAULT_FLAVOR } from '../config/flavor';
 
 interface AppContextType {
   posts: Post[];
@@ -10,8 +11,11 @@ interface AppContextType {
   blockedEntities: BlockedEntity[];
   conversations: DMConversation[];
   activeCharacter: Character; // Character identity currently posting
+  flavor: BuildFlavor;
+  flavorConfig: FlavorConfig;
+  setFlavor: (flavor: BuildFlavor) => void;
   setActiveCharacter: (char: Character) => void;
-  createPost: (content: string, imageUrl?: string) => void;
+  createPost: (content: string, imageUrl?: string, aspectRatio?: number) => void;
   likePost: (postId: string) => void;
   reportPost: (postId: string, reason: string) => void;
   blockCharacter: (character: Character) => void;
@@ -32,6 +36,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [wordFilters, setWordFilters] = useState<WordFilter[]>(initialWordFilters);
   const [blockedEntities, setBlockedEntities] = useState<BlockedEntity[]>(initialBlockedEntities);
   const [conversations, setConversations] = useState<DMConversation[]>(initialConversations);
+  const [flavor, setFlavor] = useState<BuildFlavor>(DEFAULT_FLAVOR);
+  const flavorConfig = FLAVOR_CONFIGS[flavor];
 
   // Default active character is ท่านยม (User's owned character)
   const myChars = characters.filter((c) => c.isOwner);
@@ -78,14 +84,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true };
   };
 
-  // Create post in the name of activeCharacter
-  const createPost = (content: string, imageUrl?: string) => {
+  // Create post: Owner posts in their own name, showcasing the selected character!
+  const createPost = (content: string, imageUrl?: string, aspectRatio?: number) => {
     const newPost: Post = {
       id: 'post_' + Date.now(),
+      ownerId: initialCurrentUser.id,
+      ownerName: initialCurrentUser.name,
+      ownerAvatarUrl: initialCurrentUser.avatarUrl || 'https://livezala.com/media/avatar/default',
+      ownerHandle: initialCurrentUser.handle || '@foolish_max',
+      isOfficialOwner: false,
       characterId: activeCharacter.id,
       character: activeCharacter,
       content,
       imageUrl,
+      aspectRatio,
       likeCount: 0,
       commentCount: 0,
       reportCount: 0,
@@ -214,6 +226,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         blockedEntities,
         conversations,
         activeCharacter,
+        flavor,
+        flavorConfig,
+        setFlavor,
         setActiveCharacter,
         createPost,
         likePost,

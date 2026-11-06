@@ -15,14 +15,16 @@ interface CharacterCardProps {
 export const CharacterCard: React.FC<CharacterCardProps> = ({ character, onPress, onOpenDM }) => {
   const { toggleFollow } = useApp();
 
-  const handleFollowPress = () => {
+  const handleFollowOwner = () => {
     const res = toggleFollow(character.id);
     if (!res.success && res.message) {
       Alert.alert('แจ้งเตือน', res.message);
     }
   };
 
-  const isMutual = character.isFollowing && character.isFollowerOfMe;
+  const isMutual = (character.isOwnerFollowing ?? character.isFollowing) &&
+                   (character.isOwnerFollowerOfMe ?? character.isFollowerOfMe);
+  const isFollowingOwner = character.isOwnerFollowing ?? character.isFollowing;
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
@@ -32,54 +34,74 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({ character, onPress
         <View style={styles.infoCol}>
           <View style={styles.nameRow}>
             <Text style={styles.name}>{character.name}</Text>
-            {character.isOfficial && <Badge label="OFFICIAL" variant="official" />}
-            {character.isOwner && <Badge label="ของฉัน" variant="primary" />}
+            {character.isOfficial ? (
+              <Badge label="OFFICIAL" variant="official" />
+            ) : character.isOwner ? (
+              <Badge label="ผลงานของฉัน" variant="gold" />
+            ) : (
+              <Badge label="ผลงานสมาชิก" variant="muted" />
+            )}
           </View>
           <Text style={styles.handle}>{character.handle}</Text>
         </View>
 
-        {/* Follow Button */}
+        {/* Action / Status */}
         {character.isOfficial ? (
           <View style={styles.officialLockBadge}>
             <Text style={styles.officialLockText}>🔒 ติดตามถาวร</Text>
           </View>
+        ) : character.isOwner ? (
+          <View style={styles.ownerBadge}>
+            <Text style={styles.ownerBadgeText}>★ เจ้าของ</Text>
+          </View>
         ) : (
           <Button
-            title={character.isFollowing ? 'กำลังติดตาม' : '+ ติดตาม'}
-            variant={character.isFollowing ? 'outline' : 'primary'}
-            onPress={handleFollowPress}
+            title={isFollowingOwner ? 'กำลังติดตามเจ้าของ' : '+ ติดตามเจ้าของ'}
+            variant={isFollowingOwner ? 'outline' : 'primary'}
+            onPress={handleFollowOwner}
             style={styles.followBtn}
             textStyle={styles.followBtnText}
           />
         )}
       </View>
 
+      {/* Creator / Owner Attribution — Model: ตัวละครแสดงเป็นผลงานของเจ้าของใต้บัญชีเจ้าของ */}
+      <View style={styles.creatorBar}>
+        <Text style={styles.creatorLabel}>
+          👤 เจ้าของผลงาน: <Text style={styles.creatorName}>{character.ownerName}</Text>
+          {character.ownerHandle ? ` (${character.ownerHandle})` : ''}
+        </Text>
+      </View>
+
       <Text style={styles.bio} numberOfLines={2}>
         {character.bio}
       </Text>
 
-      {/* Stats and DM Capability */}
+      {/* DNA Highlight and Actions */}
       <View style={styles.footerRow}>
-        <View style={styles.stats}>
-          <Text style={styles.statItem}>
-            <Text style={styles.statBold}>{character.followerCount.toLocaleString()} </Text>
-            ผู้ติดตาม
-          </Text>
-          <Text style={styles.statItem}>
-            <Text style={styles.statBold}>{character.followingCount.toLocaleString()} </Text>
-            กำลังติดตาม
+        <View style={styles.dnaSnippet}>
+          <Text style={styles.dnaText} numberOfLines={1}>
+            🧬 {character.dna.personality}
           </Text>
         </View>
 
-        {/* DM Status */}
-        {onOpenDM && (
+        {/* DM to Owner */}
+        {onOpenDM && !character.isOwner && !character.isOfficial && (
           <TouchableOpacity
             style={[styles.dmBtn, !isMutual && styles.dmBtnDisabled]}
-            onPress={isMutual ? onOpenDM : () => Alert.alert('DM ถูกล็อก', 'สามารถส่งข้อความได้เมื่อทั้งสองฝ่ายติดตามกันแล้วเท่านั้น')}
+            onPress={
+              isMutual
+                ? onOpenDM
+                : () =>
+                    Alert.alert(
+                      'การส่งข้อความระหว่างสมาชิก',
+                      `ตามกฎความปลอดภัย: ส่งข้อความถึงเจ้าของ (${character.ownerName}) ได้เมื่อทั้งสองฝ่ายกดติดตามกันแล้วเท่านั้น`
+                    )
+            }
             activeOpacity={0.8}
           >
             <Text style={[styles.dmBtnText, !isMutual && styles.dmBtnTextDisabled]}>
-              {isMutual ? '💬 ส่งข้อความ' : '🔒 ต้องติดตามกันก่อน'}
+              {isMutual ? '💬 ข้อความถึงเจ้าของ' : '🔒 ต้องติดตามกันสองฝ่าย'}
             </Text>
           </TouchableOpacity>
         )}
@@ -107,8 +129,8 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
   },
   infoCol: {
     flex: 1,
@@ -117,6 +139,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flexWrap: 'wrap',
   },
   name: {
     color: colors.text,
@@ -124,29 +147,59 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   handle: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontSize: 12,
     marginTop: 2,
   },
   officialLockBadge: {
-    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+    backgroundColor: colors.badgeBg,
     borderWidth: 1,
-    borderColor: colors.info,
+    borderColor: colors.badgeBorder,
     paddingHorizontal: 8,
     paddingVertical: 5,
     borderRadius: 6,
   },
   officialLockText: {
-    color: colors.info,
+    color: colors.badgeText,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  ownerBadge: {
+    backgroundColor: colors.badgeBg,
+    borderWidth: 1,
+    borderColor: colors.badgeBorder,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  ownerBadgeText: {
+    color: colors.primary,
     fontSize: 11,
     fontWeight: '700',
   },
   followBtn: {
     height: 34,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
   },
   followBtnText: {
+    fontSize: 11,
+  },
+  creatorBar: {
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginTop: 10,
+    borderLeftWidth: 2,
+    borderLeftColor: colors.primary,
+  },
+  creatorLabel: {
+    color: colors.textSecondary,
     fontSize: 12,
+  },
+  creatorName: {
+    color: colors.primary,
+    fontWeight: '700',
   },
   bio: {
     color: colors.textSecondary,
@@ -162,25 +215,22 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: colors.border,
+    gap: 10,
   },
-  stats: {
-    flexDirection: 'row',
-    gap: 14,
+  dnaSnippet: {
+    flex: 1,
   },
-  statItem: {
-    color: colors.textMuted,
-    fontSize: 12,
-  },
-  statBold: {
-    color: colors.text,
-    fontWeight: '700',
+  dnaText: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontStyle: 'italic',
   },
   dmBtn: {
     backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
-    borderColor: colors.borderLight,
+    borderColor: colors.badgeBorder,
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 6,
     borderRadius: 6,
   },
   dmBtnDisabled: {
@@ -189,10 +239,10 @@ const styles = StyleSheet.create({
   },
   dmBtnText: {
     color: colors.primary,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   dmBtnTextDisabled: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
   },
 });
